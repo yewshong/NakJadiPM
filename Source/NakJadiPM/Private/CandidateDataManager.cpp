@@ -16,7 +16,6 @@ ACandidateDataManager::ACandidateDataManager()
 void ACandidateDataManager::BeginPlay()
 {
 	Super::BeginPlay();
-	
 }
 
 // Called every frame
@@ -25,4 +24,3 @@ void ACandidateDataManager::Tick( float DeltaTime )
 	Super::Tick( DeltaTime );
 
 }
-

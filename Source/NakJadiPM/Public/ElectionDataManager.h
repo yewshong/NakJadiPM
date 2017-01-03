@@ -6,15 +6,35 @@
 #include "ElectionDataManager.generated.h"
 
 
+
+USTRUCT(BlueprintType)
+struct FState : public FTableRowBase
+{
+	GENERATED_USTRUCT_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FString Name;
+	int index;
+	FString TexturePath;
+
+	FState()
+	{
+
+	}
+};
 USTRUCT(BlueprintType)
 struct FParlimentSeat : public FTableRowBase
 {
 	GENERATED_USTRUCT_BODY()
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-		FString Name;
+	FString State;
+	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-		int VotersCount;
+	FString Name;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	int Count;
 
 	FParlimentSeat()
 	{
@@ -22,20 +42,44 @@ struct FParlimentSeat : public FTableRowBase
 };
 
 USTRUCT(BlueprintType)
-struct FState : public FTableRowBase
+struct FAllParlimentSeatsData : public FTableRowBase
 {
 	GENERATED_USTRUCT_BODY()
 
-		UPROPERTY(EditAnywhere, BlueprintReadWrite)
-		FString Name;
-	int index;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+		FString Version;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 		TArray<FParlimentSeat> ParlimentSeats;
 
-	FState()
+	FAllParlimentSeatsData()
 	{
 		ParlimentSeats = TArray<FParlimentSeat>();
+	}
+};
+
+
+
+USTRUCT(BlueprintType)
+struct FParlimentSeatResult 
+{
+	GENERATED_USTRUCT_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FString State;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FString Name;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	int Count;
+		
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float currentResult;
+
+	FParlimentSeatResult()
+	{
+		currentResult = 0;
 	}
 };
 
@@ -44,18 +88,35 @@ struct FElectionData : public FTableRowBase
 {
 	GENERATED_USTRUCT_BODY()
 
-		UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 		float Version;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-		TArray<FState> States;
+		TArray<FParlimentSeatResult> ParlimentSeatsResult;
 
 	FElectionData()
 	{
 		Version = 0;
-		States = TArray<FState>();
+		ParlimentSeatsResult = TArray<FParlimentSeatResult>();
 	}
 };
+
+
+USTRUCT(BlueprintType)
+struct FCurrentElectionResult : public FTableRowBase
+{
+	GENERATED_USTRUCT_BODY()
+		
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+		TArray<FParlimentSeat> ParlimentSeats;
+
+	FCurrentElectionResult()
+	{
+		ParlimentSeats = TArray<FParlimentSeat>();
+	}
+};
+
+
 
 UCLASS()
 class NAKJADIPM_API AElectionDataManager : public AActor
@@ -71,7 +132,4 @@ public:
 	
 	// Called every frame
 	virtual void Tick( float DeltaSeconds ) override;
-
-	
-	
 };
