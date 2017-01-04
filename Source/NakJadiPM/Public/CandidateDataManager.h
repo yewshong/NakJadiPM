@@ -59,6 +59,9 @@ struct FCandidate : public FTableRowBase
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TArray<FString> Skills;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FString potraitPath;
+
 	FCandidate()
 	{
 		Skills = TArray<FString>();

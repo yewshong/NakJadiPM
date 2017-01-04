@@ -39,13 +39,16 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "DataTable")
 		void ContsructCandidateDataFromDataTable();
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
 	FAllCandidatesData CandidatesData;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
 	FAllParlimentSeatsData ParlimentSeatsData;
 	
-	//UFUNCTION(BlueprintCallable, Category = "SaveData")
-	//bool GameSaveDataExists();
-	//UFUNCTION(BlueprintCallable, Category = "SaveData")
-	//bool GameSaveDataExpired();
+	UFUNCTION(BlueprintCallable, Category = "SaveData")
+	bool GameSaveDataExists();
+	UFUNCTION(BlueprintCallable, Category = "SaveData")
+	bool GameSaveDataExpired();
 	//UFUNCTION(BlueprintCallable, Category = "SaveData")
 	//void CreateNewGameSaveData();
 };

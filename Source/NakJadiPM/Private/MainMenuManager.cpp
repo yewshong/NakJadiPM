@@ -25,20 +25,21 @@ void AMainMenuManager::Tick( float DeltaTime )
 
 }
 
-void AMainMenuManager::IntroClicked()
+bool AMainMenuManager::ChangeToGameLevelIfDataExists()
 {
 	//load from save 
 	//if exists, load game-> jump to game level 
 	//if not create game 
 	UE_LOG(LogTemp,Warning,TEXT("Intro clicked call stack works!"))
-	if (SaveGameManager::SaveExists())
+	if(DataManager)
 	{
-		UGameplayStatics::OpenLevel(GetWorld(), "GameLevel");
+	if (DataManager->GameSaveDataExists())
+	{
+		return true;
 	}
 	else
-	{
-
+		return false;
 	}
-
+	return false;
 }
 

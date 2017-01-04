@@ -81,4 +81,18 @@ void AGeneralDataManager::ContsructCandidateDataFromDataTable()
 		UE_LOG(LogTemp, Warning, TEXT("Candidate data return false =.='"));
 }
 
+bool AGeneralDataManager::GameSaveDataExists()
+{
+	return SaveGameManager::SaveExists();
+}
+
+bool  AGeneralDataManager::GameSaveDataExpired()
+{
+	return false;
+}
+
+
+
+
+
 
