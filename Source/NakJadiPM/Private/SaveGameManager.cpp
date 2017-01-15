@@ -3,18 +3,24 @@
 #include "NakJadiPM.h"
 #include "SaveGameManager.h"
 
-UCampaignSaveGame* SaveGameManager::CurrentSaveGame;
-
-SaveGameManager::SaveGameManager()
+ASaveGameManager::ASaveGameManager()
 {
 	GetCampaignSaveGame();
 }
 
-SaveGameManager::~SaveGameManager()
+// Called when the game starts or when spawned
+void ASaveGameManager::BeginPlay()
 {
+	Super::BeginPlay();
 }
 
-UCampaignSaveGame* SaveGameManager::GetCampaignSaveGame()
+// Called every frame
+void ASaveGameManager::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
+}
+
+UCampaignSaveGame* ASaveGameManager::GetCampaignSaveGame()
 {
 	if(!CurrentSaveGame)
 	{
@@ -25,12 +31,18 @@ UCampaignSaveGame* SaveGameManager::GetCampaignSaveGame()
 	return CurrentSaveGame;
 }
 
-bool SaveGameManager::UpdateSaveGame(UCampaignSaveGame* ToBeSavedGame)
+bool ASaveGameManager::UpdateSaveGame(UCampaignSaveGame* ToBeSavedGame)
 {
-	return UGameplayStatics::SaveGameToSlot(ToBeSavedGame, ToBeSavedGame->SaveSlotName, ToBeSavedGame->UserIndex);
+	if (UGameplayStatics::SaveGameToSlot(ToBeSavedGame, ToBeSavedGame->SaveSlotName, ToBeSavedGame->UserIndex))
+	{
+		CurrentSaveGame = ToBeSavedGame;
+		return true;
+	}
+	else
+		return false;
 }
 
-bool SaveGameManager::SaveExists()
+bool ASaveGameManager::SaveExists()
 {
 	if (CurrentSaveGame)
 		return true;
@@ -42,5 +54,30 @@ bool SaveGameManager::SaveExists()
 	}
 
 	return false;
+}
+
+
+
+bool ASaveGameManager::CreateNewAndSaveGame(FCurrentCampaignData CampaignData)
+{
+	if (SaveExists())
+	{
+		if (!DeleteSaveGame())
+			return false;
+	}
+
+	//UCampaignSaveGame NewSaveGame = UCampaignSaveGame();
+	UCampaignSaveGame* SaveGameInstance = Cast<UCampaignSaveGame>(UGameplayStatics::CreateSaveGameObject(UCampaignSaveGame::StaticClass()));
+	SaveGameInstance->CampaignData = CampaignData;
+	return UGameplayStatics::SaveGameToSlot(SaveGameInstance, SaveGameInstance->SaveSlotName, SaveGameInstance->UserIndex);
+
+}
+bool ASaveGameManager::DeleteSaveGame()
+{
+	GetCampaignSaveGame();
+	if (!CurrentSaveGame)
+		return false;
+
+	return UGameplayStatics::DeleteGameInSlot(CurrentSaveGame->SaveSlotName, CurrentSaveGame->UserIndex);
 }
 

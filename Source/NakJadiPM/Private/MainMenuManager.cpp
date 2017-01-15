@@ -30,7 +30,7 @@ bool AMainMenuManager::ChangeToGameLevelIfDataExists()
 	//load from save 
 	//if exists, load game-> jump to game level 
 	//if not create game 
-	UE_LOG(LogTemp,Warning,TEXT("Intro clicked call stack works!"))
+	return false;
 	if(DataManager)
 	{
 	if (DataManager->GameSaveDataExists())

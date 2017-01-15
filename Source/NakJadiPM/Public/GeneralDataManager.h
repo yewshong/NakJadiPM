@@ -31,7 +31,13 @@ public:
 		UDataTable* CandidatesDataTable;
 
 	UPROPERTY(EditAnywhere, Category = "DataTable")
-		UDataTable* SkillsCostData;
+		UDataTable* StatesDataTable;
+
+	UPROPERTY(EditAnywhere, Category = "DataTable")
+		UDataTable* SkillsCostDataTable;
+	
+	UFUNCTION(BlueprintCallable, Category = "DataTable")
+		void ContrustAllDataFromDataTable();
 
 	UFUNCTION(BlueprintCallable, Category = "DataTable")
 		void ContrustElectionDataFromDataTable();
@@ -39,11 +45,24 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "DataTable")
 		void ContsructCandidateDataFromDataTable();
 
+	UFUNCTION(BlueprintCallable, Category = "DataTable")
+		void ContsructStatesDataFromDataTable();
+
+	UFUNCTION(BlueprintCallable, Category = "DataTable")
+		void ContsructSkillsCostDataFromDataTable();
+
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
 	FAllCandidatesData CandidatesData;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
 	FAllParlimentSeatsData ParlimentSeatsData;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
+	FAllStatesData StatesData;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
+		FAllSkillCostData SkillsCostData;
 	
 	UFUNCTION(BlueprintCallable, Category = "SaveData")
 	bool GameSaveDataExists();
@@ -51,4 +70,12 @@ public:
 	bool GameSaveDataExpired();
 	//UFUNCTION(BlueprintCallable, Category = "SaveData")
 	//void CreateNewGameSaveData();
+
+	UFUNCTION(BlueprintCallable, Category = "SaveData")
+	bool CreateNewAndSaveGame(FCandidate SelectedCandidate);
+	
+	UFUNCTION(BlueprintCallable, Category = "SaveData")
+	bool DeleteSaveGame();
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "SaveData")
+	ASaveGameManager* SaveGameManager = nullptr;
 };

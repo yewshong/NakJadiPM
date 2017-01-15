@@ -14,19 +14,19 @@ class NAKJADIPM_API UCampaignSaveGame : public USaveGame
 	GENERATED_BODY()
 public:
 
-	UPROPERTY(VisibleAnywhere, Category = Basic)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
 		FString SaveSlotName;
 
-	UPROPERTY(VisibleAnywhere, Category = Basic)
-		uint32 UserIndex;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
+		int UserIndex;
 
-	UPROPERTY(VisibleAnywhere, Category = Basic)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
 	FString PlayerName;
 
-	UPROPERTY(VisibleAnywhere, Category = Basic)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
 	FCurrentCampaignData CampaignData;
 
-	UPROPERTY(VisibleAnywhere, Category = Basic)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
 	bool finished;
 	
 	UCampaignSaveGame();

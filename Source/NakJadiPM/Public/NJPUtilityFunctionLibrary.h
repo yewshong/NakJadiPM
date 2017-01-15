@@ -16,5 +16,6 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "NJPUtility")
 		static UTexture2D* LoadTextureFromPath(const FString& Path);
 	
-	
+	UFUNCTION(BlueprintCallable, Category = "NJPUtility")
+		static FString FormatStringToGoldFormat(int input);
 };

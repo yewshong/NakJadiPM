@@ -15,16 +15,24 @@ AGeneralDataManager::AGeneralDataManager()
 void AGeneralDataManager::BeginPlay()
 {
 	Super::BeginPlay();
-	ContrustElectionDataFromDataTable();
-	ContsructCandidateDataFromDataTable();
+	SaveGameManager = (ASaveGameManager*)GetWorld()->SpawnActor(ASaveGameManager::StaticClass());
 }
 
 // Called every frame
 void AGeneralDataManager::Tick( float DeltaTime )
 {
 	Super::Tick( DeltaTime );
-
 }
+
+void AGeneralDataManager::ContrustAllDataFromDataTable()
+{
+	ContrustElectionDataFromDataTable();
+	ContsructCandidateDataFromDataTable();
+	ContsructStatesDataFromDataTable();
+	ContsructSkillsCostDataFromDataTable();
+}
+
+
 void AGeneralDataManager::ContrustElectionDataFromDataTable()
 {	 
 	ParlimentSeatsData = FAllParlimentSeatsData();
@@ -39,18 +47,16 @@ void AGeneralDataManager::ContrustElectionDataFromDataTable()
 			FParlimentSeat* Row = ParlimentSeatsDataTable->FindRow<FParlimentSeat>(FindRowName, FString(""));
 			if (Row)
 			{
-				UE_LOG(LogTemp, Warning, TEXT("Parliment data found for %s"), *Row->Name);
 				ParlimentSeatsData.ParlimentSeats.Add(*Row);
 				RowIndex++;
 			}
 			else
 				TimetoBreak = true;
 		}
-		UE_LOG(LogTemp, Warning, TEXT("ParlimentSeats data stop at %d"), RowIndex);
 
 	}
 	else
-		UE_LOG(LogTemp, Warning, TEXT("ParlimentSeats Data return false =.='"));
+		UE_LOG(LogTemp, Warning, TEXT("ParlimentSeats variable is not set =.='"));
 }
 
 void AGeneralDataManager::ContsructCandidateDataFromDataTable()
@@ -67,30 +73,119 @@ void AGeneralDataManager::ContsructCandidateDataFromDataTable()
 			FCandidate* Row = CandidatesDataTable->FindRow<FCandidate>(FindRowName, FString(""));
 			if (Row)
 			{
-				UE_LOG(LogTemp, Warning, TEXT("Candidate data found for %s"), *Row->Name);
 				CandidatesData.AllCandidates.Add(*Row);
 				RowIndex++;
 			}
 			else
 				TimetoBreak = true;
 		}
-		UE_LOG(LogTemp, Warning, TEXT("Candidate data stop at %d"), RowIndex);
 
 	}
 	else
-		UE_LOG(LogTemp, Warning, TEXT("Candidate data return false =.='"));
+		UE_LOG(LogTemp, Warning, TEXT("Candidate variable is not set =.='"));
+}
+
+void AGeneralDataManager::ContsructStatesDataFromDataTable()
+{
+	StatesData = FAllStatesData();
+	StatesData.Version = DataVersion;
+	if (StatesDataTable)
+	{
+		int RowIndex = 1;
+		bool TimetoBreak = false;
+		while (!TimetoBreak)
+		{
+			FName FindRowName = FName(*FString::FromInt(RowIndex));
+			FState* Row = StatesDataTable->FindRow<FState>(FindRowName, FString(""));
+			if (Row)
+			{
+				StatesData.States.Add(*Row);
+				RowIndex++;
+			}
+			else
+				TimetoBreak = true;
+		}
+	}
+	else
+		UE_LOG(LogTemp, Warning, TEXT("States data variable is not set =.='"));
+}
+
+void AGeneralDataManager::ContsructSkillsCostDataFromDataTable()
+{
+	SkillsCostData = FAllSkillCostData();
+	SkillsCostData.Version = DataVersion;
+	if (SkillsCostDataTable)
+	{
+		int RowIndex = 1;
+		bool TimetoBreak = false;
+		while (!TimetoBreak)
+		{
+			FName FindRowName = FName(*FString::FromInt(RowIndex));
+			FSkillCostInfo* Row = SkillsCostDataTable->FindRow<FSkillCostInfo>(FindRowName, FString(""));
+			if (Row)
+			{
+				SkillsCostData.SkillCosts.Add(*Row);
+				RowIndex++;
+			}
+			else
+				TimetoBreak = true;
+		}
+	}
+	else
+		UE_LOG(LogTemp, Warning, TEXT("SkillCost data return false =.='"));
 }
 
 bool AGeneralDataManager::GameSaveDataExists()
 {
-	return SaveGameManager::SaveExists();
+	if (SaveGameManager)
+		return SaveGameManager->SaveExists();
+	else
+		return false;
 }
 
 bool  AGeneralDataManager::GameSaveDataExpired()
 {
+	//if(SaveGameManager::CurrentSaveGame)
 	return false;
 }
 
+bool AGeneralDataManager::CreateNewAndSaveGame(FCandidate SelectedCandidate)
+{
+	FCurrentCampaignData CampaignData = FCurrentCampaignData();
+	//add populate data from struct
+	
+	CampaignData.SelectedCandidate = SelectedCandidate;
+	
+	CampaignData.ParlimentSeatsData = ParlimentSeatsData;
+	CampaignData.StatesData = StatesData;
+	CampaignData.SkillsCostData = SkillsCostData;
+
+	for (int i = 0; i < SkillsCostData.SkillCosts.Num(); i++)
+	{
+		if (i == 0)
+			CampaignData.ClickDamage = SkillsCostData.SkillCosts[i].Damage;
+
+		FSkillUpgradeInfo upgradeInfo = FSkillUpgradeInfo();
+		upgradeInfo.Index = i;
+		CampaignData.SkillUpgradeRecord.Add(upgradeInfo);
+	}
+
+	if (SaveGameManager)
+		return SaveGameManager->CreateNewAndSaveGame(CampaignData);
+	else
+		return false;
+}
+
+
+UFUNCTION(BlueprintCallable, Category = "SaveData")
+bool AGeneralDataManager::DeleteSaveGame()
+{
+	if (SaveGameManager)
+		return SaveGameManager->DeleteSaveGame();
+	else
+		return false;
+}
+ 
 
 
 

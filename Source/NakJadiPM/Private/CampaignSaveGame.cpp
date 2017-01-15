@@ -10,3 +10,5 @@ UCampaignSaveGame::UCampaignSaveGame()
 	SaveSlotName = TEXT("CampaignData");
 	UserIndex = 0;
 }
+
+

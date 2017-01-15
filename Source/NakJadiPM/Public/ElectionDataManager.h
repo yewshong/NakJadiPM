@@ -14,14 +14,28 @@ struct FState : public FTableRowBase
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FString Name;
-	int index;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FString TexturePath;
+};
 
-	FState()
+USTRUCT(BlueprintType)
+struct FAllStatesData : public FTableRowBase
+{
+	GENERATED_USTRUCT_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+		FString Version;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+		TArray<FState> States;
+
+	FAllStatesData()
 	{
-
+		States = TArray<FState>();
 	}
 };
+
+
 USTRUCT(BlueprintType)
 struct FParlimentSeat : public FTableRowBase
 {
@@ -35,10 +49,6 @@ struct FParlimentSeat : public FTableRowBase
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	int Count;
-
-	FParlimentSeat()
-	{
-	}
 };
 
 USTRUCT(BlueprintType)
@@ -59,31 +69,24 @@ struct FAllParlimentSeatsData : public FTableRowBase
 };
 
 
-
 USTRUCT(BlueprintType)
 struct FParlimentSeatResult 
 {
 	GENERATED_USTRUCT_BODY()
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FString State;
-
+	int Index;
+			
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FString Name;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	int Count;
-		
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float currentResult;
+	float possesion;
 
 	FParlimentSeatResult()
 	{
-		currentResult = 0;
+		possesion = 0;
 	}
 };
 
-USTRUCT(BlueprintType)
+/*USTRUCT(BlueprintType)
 struct FElectionData : public FTableRowBase
 {
 	GENERATED_USTRUCT_BODY()
@@ -99,23 +102,7 @@ struct FElectionData : public FTableRowBase
 		Version = 0;
 		ParlimentSeatsResult = TArray<FParlimentSeatResult>();
 	}
-};
-
-
-USTRUCT(BlueprintType)
-struct FCurrentElectionResult : public FTableRowBase
-{
-	GENERATED_USTRUCT_BODY()
-		
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-		TArray<FParlimentSeat> ParlimentSeats;
-
-	FCurrentElectionResult()
-	{
-		ParlimentSeats = TArray<FParlimentSeat>();
-	}
-};
-
+};*/
 
 
 UCLASS()

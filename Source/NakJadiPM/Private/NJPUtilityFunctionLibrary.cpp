@@ -16,3 +16,9 @@ UTexture2D* UNJPUtilityFunctionLibrary::LoadTextureFromPath(const FString& Path)
 
 	return Cast<UTexture2D>(StaticLoadObject(UTexture2D::StaticClass(), NULL, *(Path)));
 }
+
+
+FString UNJPUtilityFunctionLibrary::FormatStringToGoldFormat(int input)
+{
+	return FString::FromInt(input);
+}

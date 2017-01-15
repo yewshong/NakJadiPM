@@ -11,15 +11,33 @@ struct FSkillCostInfo : public FTableRowBase
 	GENERATED_USTRUCT_BODY()
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	int SkillLevel;
+	int SkillStage;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float Damage;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	int StartingCost;
-	
+	 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float AddPerCentAfterUpgrade;
 };
 
+USTRUCT(BlueprintType)
+struct FAllSkillCostData : public FTableRowBase
+{
+	GENERATED_USTRUCT_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+		FString Version;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+		TArray<FSkillCostInfo> SkillCosts;
+
+	FAllSkillCostData()
+	{
+		SkillCosts = TArray<FSkillCostInfo>();
+	}
+};
 
 USTRUCT(BlueprintType)
 struct FCandidateSkills : public FTableRowBase
@@ -33,18 +51,15 @@ struct FCandidateSkills : public FTableRowBase
 };
 
 USTRUCT(BlueprintType)
-struct FCurrentCampaignSkillInfo
+struct FSkillUpgradeInfo
 {
 	GENERATED_USTRUCT_BODY()
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-		FString Name;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-		FString Description;
+	int Index;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-		int upgradeLevel;
+	int Level;
 
 };
 
@@ -100,14 +115,54 @@ struct FCurrentCampaignData
 	FCandidate SelectedCandidate;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	TArray<FCurrentCampaignSkillInfo> CurrentCampaignSkills;
+	FTimespan TimeRemaining;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	int balance;
+	float Balance;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float ClickDamage;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float VotesPerSecond;
+
+	//add state
+	//add skill upgrade formula? 
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
+	FAllParlimentSeatsData ParlimentSeatsData;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
+		FAllStatesData StatesData;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
+		FAllSkillCostData SkillsCostData;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FCurrentElectionResult CurrentElectionResult;
+	TArray<FParlimentSeatResult> SeatPossessionRecord;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TArray<FSkillUpgradeInfo> SkillUpgradeRecord;
+
+	FCurrentCampaignData()
+	{
+		Finished = false;
+		TimeRemaining = FTimespan(24,0,0);
+		Balance = 0;
+		ClickDamage = 0.1;
+		VotesPerSecond = 0;
+		StartTime = FDateTime::UtcNow();
+		ParlimentSeatsData = FAllParlimentSeatsData();
+		StatesData = FAllStatesData();
+		SkillsCostData = FAllSkillCostData();
+		SeatPossessionRecord = TArray<FParlimentSeatResult>();
+		SkillUpgradeRecord = TArray<FSkillUpgradeInfo>();
+	}
+
+	static bool VerifyCaimpagnData(FCurrentCampaignData Data)
+	{
+		return true;
+	}
 };
 
 
