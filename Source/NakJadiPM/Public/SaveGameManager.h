@@ -36,6 +36,7 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "Save")
 	bool SaveExists();
+
 	//UFUNCTION(BlueprintCallable, Category = "Save")
 	//bool CampaignFinished();
 	//UFUNCTION(BlueprintCallable, Category = "Save")

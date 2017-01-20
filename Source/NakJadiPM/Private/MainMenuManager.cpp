@@ -22,20 +22,22 @@ void AMainMenuManager::BeginPlay()
 void AMainMenuManager::Tick( float DeltaTime )
 {
 	Super::Tick( DeltaTime );
-
 }
 
-bool AMainMenuManager::ChangeToGameLevelIfDataExists()
+bool AMainMenuManager::ChangeToGameLevelIfConditionMet()
 {
 	//load from save 
 	//if exists, load game-> jump to game level 
 	//if not create game 
-	return false;
 	if(DataManager)
 	{
 	if (DataManager->GameSaveDataExists())
 	{
-		return true;
+		UCampaignSaveGame* SavedGame = DataManager->SaveGameManager->GetCampaignSaveGame();
+		if (SavedGame->CampaignData.FinishedReported)
+			return false;
+		else
+			return true;
 	}
 	else
 		return false;

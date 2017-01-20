@@ -151,6 +151,8 @@ bool  AGeneralDataManager::GameSaveDataExpired()
 
 bool AGeneralDataManager::CreateNewAndSaveGame(FCandidate SelectedCandidate)
 {
+	if (GEngine)
+	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, TEXT("Entered into create New And Save Game"));
 	FCurrentCampaignData CampaignData = FCurrentCampaignData();
 	//add populate data from struct
 	
@@ -172,12 +174,13 @@ bool AGeneralDataManager::CreateNewAndSaveGame(FCandidate SelectedCandidate)
 
 	if (SaveGameManager)
 		return SaveGameManager->CreateNewAndSaveGame(CampaignData);
-	else
+	else {
+		if (GEngine)
+			GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, TEXT("Create New And Save Game:Save Game Manager is null"));
 		return false;
+	}
 }
 
-
-UFUNCTION(BlueprintCallable, Category = "SaveData")
 bool AGeneralDataManager::DeleteSaveGame()
 {
 	if (SaveGameManager)
@@ -185,7 +188,15 @@ bool AGeneralDataManager::DeleteSaveGame()
 	else
 		return false;
 }
- 
+
+
+bool AGeneralDataManager::UpdateSaveGame(UCampaignSaveGame* ToBeSavedGame)
+{
+	if (SaveGameManager)
+		return SaveGameManager->UpdateSaveGame(ToBeSavedGame);
+	else
+		return false;
+}
 
 
 

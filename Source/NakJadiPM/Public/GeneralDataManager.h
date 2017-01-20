@@ -76,6 +76,10 @@ public:
 	
 	UFUNCTION(BlueprintCallable, Category = "SaveData")
 	bool DeleteSaveGame();
+
+	UFUNCTION(BlueprintCallable, Category = "Save")
+		bool UpdateSaveGame(UCampaignSaveGame* ToBeSavedGame);
+	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "SaveData")
 	ASaveGameManager* SaveGameManager = nullptr;
 };

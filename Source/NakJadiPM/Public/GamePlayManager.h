@@ -1,6 +1,8 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
+
+#include "NJPUtilityFunctionLibrary.h"
 #include "SaveGameManager.h"
 #include "GeneralDataManager.h"
 #include "GameFramework/Actor.h"
@@ -10,8 +12,10 @@ UCLASS()
 class NAKJADIPM_API AGamePlayManager : public AActor
 {
 	GENERATED_BODY()
-	
+		DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FShowResumeDialogue, float, idleGain);
 public:	
+
+	//DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnResumeProcessedFinished, AGamePlayManager*);
 	// Sets default values for this actor's properties
 	AGamePlayManager();
 
@@ -35,6 +39,7 @@ public:
 		void UpdateGamePerSecond();
 
 	FTimespan UpdateTimeSpan;
+	FTimespan AutoSaveTimeSpan;
 
 	UFUNCTION(BlueprintCallable, Category = "Data")
 		void Initialize();
@@ -44,16 +49,28 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Interaction")
 		void ProcessPlayerClick();
 	UFUNCTION(BlueprintCallable, Category = "Interaction")
-		void ProcessPlayerUpgrade(int SkillIndex, int Cost);
+		void ProcessPlayerUpgrade(int SkillIndex, float Cost);
 	
 	UFUNCTION(BlueprintCallable, Category = "Process")
 		void ProcessParlimentSeatsResult();
 	UFUNCTION(BlueprintCallable, Category = "Process")
 		void ProcessVotesPerSecond();
 	UFUNCTION(BlueprintCallable, Category = "Process")
-		void AddVotesToCurrentSeat(float VoteCount);
+		void AddVotesToSeats(float VoteCount);
 	UFUNCTION(BlueprintCallable, Category = "Process")
 		int GetVotersCountByIndex(int Index);
+	UFUNCTION(BlueprintCallable, Category = "Process")
+		void ProcessTimeRemaining();
+	UFUNCTION(BlueprintCallable, Category = "Process")
+		void ProcessAchievement();
+	UFUNCTION(BlueprintCallable, Category = "Process")
+		void ProcessGameResume();
+	UFUNCTION(BlueprintCallable, Category = "Process")
+		float ReturnRemainingVotesFromCurrentSeat();
+
+	
+	UFUNCTION(BlueprintCallable, Category = "Process")
+		void SaveCurrentGame();
 	
 	/*UFUNCTION(BlueprintCallable, Category = "Interaction")
 	bool playerUpgrade();
@@ -64,5 +81,12 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "loop")
 	bool UpdateElectionData();*/
 
+	UFUNCTION(BlueprintCallable, Category = "Event")
+		void FireShowResumeDialogueEvent(float IdleGains);
 
+	UPROPERTY(BlueprintAssignable, Category = "Event")
+		FShowResumeDialogue OnShowResumeDialogue;
+
+	UFUNCTION(BlueprintCallable, Category = "Process")
+		void ProcessFinishedReport();
 };

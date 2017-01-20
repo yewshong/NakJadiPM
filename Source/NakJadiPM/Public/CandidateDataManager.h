@@ -16,7 +16,7 @@ struct FSkillCostInfo : public FTableRowBase
 	float Damage;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	int StartingCost;
+	float StartingCost;
 	 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float AddPerCentAfterUpgrade;
@@ -100,16 +100,38 @@ struct FAllCandidatesData : public FTableRowBase
 	}
 };
 
+UENUM(BlueprintType)		//"BlueprintType" is essential to include
+enum class EAchievementEnum : uint8
+{
+	Candidate,
+	//StateAssemblyRepresentatives,
+	//MenteriBesar,
+	ParliamentMember,
+	PrimeMinister,
+	TwoThirdMajority,
+	FullWin
+};
+
+
 USTRUCT(BlueprintType)
 struct FCurrentCampaignData
 {
 	GENERATED_USTRUCT_BODY()
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	bool Finished;
+	bool Finished; 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool FinishedReported;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	EAchievementEnum achievement;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FDateTime StartTime;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FDateTime EndTime;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FDateTime LastSavedTime;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FCandidate SelectedCandidate;
@@ -146,12 +168,15 @@ struct FCurrentCampaignData
 
 	FCurrentCampaignData()
 	{
-		Finished = false;
+		Finished = false; FinishedReported = false;
+		achievement = EAchievementEnum::Candidate;
 		TimeRemaining = FTimespan(24,0,0);
 		Balance = 0;
 		ClickDamage = 0.1;
 		VotesPerSecond = 0;
 		StartTime = FDateTime::UtcNow();
+		EndTime = StartTime + FTimespan(24, 0, 0);
+		LastSavedTime = FDateTime::UtcNow();
 		ParlimentSeatsData = FAllParlimentSeatsData();
 		StatesData = FAllStatesData();
 		SkillsCostData = FAllSkillCostData();

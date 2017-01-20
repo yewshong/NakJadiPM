@@ -23,7 +23,7 @@ public:
 	virtual void Tick( float DeltaSeconds ) override;
 
 	UFUNCTION(BlueprintCallable, Category= "UIEvent")
-		bool ChangeToGameLevelIfDataExists();
+		bool ChangeToGameLevelIfConditionMet();
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
 		AGeneralDataManager* DataManager;

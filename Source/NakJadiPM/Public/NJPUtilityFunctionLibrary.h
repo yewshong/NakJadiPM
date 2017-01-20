@@ -2,6 +2,7 @@
 
 #pragma once
 
+#include "CandidateDataManager.h"
 #include "Kismet/BlueprintFunctionLibrary.h"
 #include "NJPUtilityFunctionLibrary.generated.h"
 
@@ -18,4 +19,13 @@ public:
 	
 	UFUNCTION(BlueprintCallable, Category = "NJPUtility")
 		static FString FormatStringToGoldFormat(int input);
+
+	UFUNCTION(BlueprintCallable, Category = "NJPUtility")
+		static float ConvertTo2Decimals(float input);
+
+	UFUNCTION(BlueprintCallable, Category = "NJPUtility")
+		static float CalculateCost(FSkillUpgradeInfo UpgradeInfo, FSkillCostInfo CostInfo);
+	
+	UFUNCTION(BlueprintCallable, Category = "NJPUtility")
+		static FString GetVictoryEnumAsString(EAchievementEnum EnumValue);
 };

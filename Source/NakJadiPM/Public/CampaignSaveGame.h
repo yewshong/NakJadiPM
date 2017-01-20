@@ -25,9 +25,6 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
 	FCurrentCampaignData CampaignData;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
-	bool finished;
 	
 	UCampaignSaveGame();
 };

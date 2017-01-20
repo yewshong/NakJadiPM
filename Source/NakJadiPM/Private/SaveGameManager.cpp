@@ -56,28 +56,35 @@ bool ASaveGameManager::SaveExists()
 	return false;
 }
 
-
-
 bool ASaveGameManager::CreateNewAndSaveGame(FCurrentCampaignData CampaignData)
 {
-	if (SaveExists())
-	{
-		if (!DeleteSaveGame())
-			return false;
-	}
-
-	//UCampaignSaveGame NewSaveGame = UCampaignSaveGame();
 	UCampaignSaveGame* SaveGameInstance = Cast<UCampaignSaveGame>(UGameplayStatics::CreateSaveGameObject(UCampaignSaveGame::StaticClass()));
 	SaveGameInstance->CampaignData = CampaignData;
 	return UGameplayStatics::SaveGameToSlot(SaveGameInstance, SaveGameInstance->SaveSlotName, SaveGameInstance->UserIndex);
-
 }
+
 bool ASaveGameManager::DeleteSaveGame()
 {
 	GetCampaignSaveGame();
 	if (!CurrentSaveGame)
-		return false;
+		return true;
 
-	return UGameplayStatics::DeleteGameInSlot(CurrentSaveGame->SaveSlotName, CurrentSaveGame->UserIndex);
+	if (!UGameplayStatics::DoesSaveGameExist(CurrentSaveGame->SaveSlotName, CurrentSaveGame->UserIndex))
+		return true;
+
+	if (UGameplayStatics::DeleteGameInSlot(CurrentSaveGame->SaveSlotName, CurrentSaveGame->UserIndex))
+	{
+
+		if (GEngine)
+			GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, TEXT("DeleteGameInSlot success"));
+		return true;
+	}
+	else
+	{
+
+		if (GEngine)
+			GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, TEXT("DeleteGameInSlot failed"));
+		return false;
+	}
 }
 
