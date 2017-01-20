@@ -12,5 +12,12 @@
 				"Engine"
 			]
 		}
+	],
+	"Plugins": [
+		{
+			"Name": "SdkboxChartboost",
+			"Enabled": true,
+			"MarketplaceURL": "com.epicgames.launcher://ue/marketplace/content/ecf22bbef10c4a5c8701ce4ad1eeedf8"
+		}
 	]
 }

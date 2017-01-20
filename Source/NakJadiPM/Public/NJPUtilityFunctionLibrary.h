@@ -28,4 +28,5 @@ public:
 	
 	UFUNCTION(BlueprintCallable, Category = "NJPUtility")
 		static FString GetVictoryEnumAsString(EAchievementEnum EnumValue);
+	
 };
