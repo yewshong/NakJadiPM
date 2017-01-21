@@ -20,6 +20,12 @@ void AGamePlayManager::BeginPlay()
 	Initialize();
 }
 
+void AGamePlayManager::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+	Super::EndPlay(EndPlayReason);
+	SaveCurrentGame();
+}
+
 void AGamePlayManager::Initialize()
 {
 	if (DataManager)
@@ -28,14 +34,15 @@ void AGamePlayManager::Initialize()
 		if (DataManager && DataManager->SaveGameManager)
 			CurrentGameData = DataManager->SaveGameManager->GetCampaignSaveGame();
 
+		ProcessParlimentSeatsResult();
+		ProcessGameResume();
+
 		FTimerHandle GameUpdateTimerHandle = FTimerHandle();
 		GetWorldTimerManager().SetTimer(GameUpdateTimerHandle, this, &AGamePlayManager::UpdateGamePerSecond, UpdateTimeSpan.GetSeconds(), true);
 		
 		FTimerHandle AutoSaveTimerHandle = FTimerHandle();
 		GetWorldTimerManager().SetTimer(AutoSaveTimerHandle, this, &AGamePlayManager::SaveCurrentGame, UpdateTimeSpan.GetSeconds(), true);
 		
-		ProcessParlimentSeatsResult();
-		ProcessGameResume();
 	}
 }
 
@@ -50,12 +57,12 @@ void AGamePlayManager::UpdateGamePerSecond()
 	if (CurrentGameData && !CurrentGameData->CampaignData.Finished)
 	{
 		//CurrentGameData
-		CurrentGameData->CampaignData.Balance += CurrentGameData->CampaignData.VotesPerSecond;
 		CurrentGameData->CampaignData.TimeRemaining = CurrentGameData->CampaignData.TimeRemaining - UpdateTimeSpan;
 		ProcessVotesPerSecond();
 		ProcessParlimentSeatsResult();
 		ProcessTimeRemaining();
 		ProcessAchievement();
+		CurrentGameData->CampaignData.LastProcessTime = FDateTime::Now();
 	}
 }
 
@@ -142,7 +149,9 @@ void AGamePlayManager::ProcessVotesPerSecond()
 {
 	if (CurrentGameData)
 	{
-		AddVotesToSeats(CurrentGameData->CampaignData.VotesPerSecond);
+		float IdleGains = GetGainsBetweenNowAndLastProcessTime();
+		CurrentGameData->CampaignData.Balance += IdleGains;
+		AddVotesToSeats(IdleGains);
 	}
 }
 
@@ -217,7 +226,7 @@ void AGamePlayManager::SaveCurrentGame()
 {
 	if (CurrentGameData && DataManager)
 	{
-		CurrentGameData->CampaignData.LastSavedTime = FDateTime::UtcNow();
+		CurrentGameData->CampaignData.LastSavedTime = FDateTime::Now();
 		DataManager->UpdateSaveGame(CurrentGameData);
 	}
 }
@@ -226,25 +235,38 @@ void AGamePlayManager::ProcessGameResume()
 {
 	if (CurrentGameData)
 	{
-		FTimespan IdleTimeSpan;
-		if(FDateTime::UtcNow() < CurrentGameData->CampaignData.EndTime)
-			IdleTimeSpan = FDateTime::UtcNow() - CurrentGameData->CampaignData.LastSavedTime;
-		else 
-		{
-			IdleTimeSpan = CurrentGameData->CampaignData.EndTime - CurrentGameData->CampaignData.LastSavedTime;
-			CurrentGameData->CampaignData.Finished = true;
-		}
-		CurrentGameData->CampaignData.TimeRemaining = CurrentGameData->CampaignData.TimeRemaining - IdleTimeSpan;
-		float IdleGains = FMath::FloorDouble(IdleTimeSpan.GetTotalSeconds()) * CurrentGameData->CampaignData.VotesPerSecond;
-		UE_LOG(LogTemp, Warning, TEXT("Before Round: %f"), IdleGains);
-		IdleGains = UNJPUtilityFunctionLibrary::ConvertTo2Decimals(IdleGains);
-		UE_LOG(LogTemp, Warning, TEXT("After Round: %f"), IdleGains);
+		float IdleGains = GetGainsBetweenNowAndLastProcessTime();
+		
 		CurrentGameData->CampaignData.Balance += IdleGains;
 		AddVotesToSeats(IdleGains);
-		
+
 		if (IdleGains > 0)
 			FireShowResumeDialogueEvent(IdleGains);
+
+		CurrentGameData->CampaignData.TimeRemaining = CurrentGameData->CampaignData.TimeRemaining - GetTimeSpanBetweenNowAndLastProcessTime();
+		CurrentGameData->CampaignData.LastProcessTime = FDateTime::Now();
 	}
+}
+
+float AGamePlayManager::GetGainsBetweenNowAndLastProcessTime()
+{
+	FTimespan IdleTimeSpan = GetTimeSpanBetweenNowAndLastProcessTime();
+	float IdleGains = FMath::Floor(IdleTimeSpan.GetTotalSeconds()) * CurrentGameData->CampaignData.VotesPerSecond;
+	IdleGains = UNJPUtilityFunctionLibrary::ConvertTo2Decimals(IdleGains);
+	return IdleGains;
+}
+
+FTimespan AGamePlayManager::GetTimeSpanBetweenNowAndLastProcessTime()
+{
+	FTimespan IdleTimeSpan;
+	if (FDateTime::Now() < CurrentGameData->CampaignData.EndTime)
+		IdleTimeSpan = FDateTime::Now() - CurrentGameData->CampaignData.LastProcessTime;
+	else
+	{
+		IdleTimeSpan = CurrentGameData->CampaignData.EndTime - CurrentGameData->CampaignData.LastSavedTime;
+		CurrentGameData->CampaignData.Finished = true;
+	}
+	return IdleTimeSpan;
 }
 
 void AGamePlayManager::FireShowResumeDialogueEvent(float IdleGains)

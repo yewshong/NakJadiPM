@@ -21,6 +21,8 @@ public:
 
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
+	// Called when the game starts or when spawned
+	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 	
 	// Called every frame
 	virtual void Tick( float DeltaSeconds ) override;
@@ -67,7 +69,10 @@ public:
 		void ProcessGameResume();
 	UFUNCTION(BlueprintCallable, Category = "Process")
 		float ReturnRemainingVotesFromCurrentSeat();
-
+	UFUNCTION(BlueprintCallable, Category = "Process")
+		float  GetGainsBetweenNowAndLastProcessTime();
+	UFUNCTION(BlueprintCallable, Category = "Process")
+		FTimespan GetTimeSpanBetweenNowAndLastProcessTime();
 	
 	UFUNCTION(BlueprintCallable, Category = "Process")
 		void SaveCurrentGame();

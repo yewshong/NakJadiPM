@@ -132,6 +132,8 @@ struct FCurrentCampaignData
 	FDateTime EndTime;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FDateTime LastSavedTime;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FDateTime LastProcessTime;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FCandidate SelectedCandidate;
@@ -174,9 +176,10 @@ struct FCurrentCampaignData
 		Balance = 0;
 		ClickDamage = 0.1;
 		VotesPerSecond = 0;
-		StartTime = FDateTime::UtcNow();
+		StartTime = FDateTime::Now();
 		EndTime = StartTime + FTimespan(24, 0, 0);
-		LastSavedTime = FDateTime::UtcNow();
+		LastProcessTime = FDateTime::Now();
+		LastSavedTime = FDateTime::Now();
 		ParlimentSeatsData = FAllParlimentSeatsData();
 		StatesData = FAllStatesData();
 		SkillsCostData = FAllSkillCostData();
