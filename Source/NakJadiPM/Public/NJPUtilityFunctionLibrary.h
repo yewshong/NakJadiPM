@@ -29,4 +29,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "NJPUtility")
 		static FString GetVictoryEnumAsString(EAchievementEnum EnumValue);
 	
+	UFUNCTION(BlueprintCallable, Category = "NJPUtility")
+		static FString ConstructPossestionText(int totalSeats, int currentSeats);
+	
+	UFUNCTION(BlueprintCallable, Category = "NJPUtility")
+		static FString GetAchievementEnumAsString(EAchievementEnum EnumValue);
 };

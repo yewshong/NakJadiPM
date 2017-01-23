@@ -53,29 +53,32 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Interaction")
 		void ProcessPlayerUpgrade(int SkillIndex, float Cost);
 	
-	UFUNCTION(BlueprintCallable, Category = "Process")
+	UFUNCTION(BlueprintCallable, Category = "Processing")
 		void ProcessParlimentSeatsResult();
-	UFUNCTION(BlueprintCallable, Category = "Process")
+	UFUNCTION(BlueprintCallable, Category = "Processing")
 		void ProcessVotesPerSecond();
-	UFUNCTION(BlueprintCallable, Category = "Process")
+	UFUNCTION(BlueprintCallable, Category = "Processing")
 		void AddVotesToSeats(float VoteCount);
-	UFUNCTION(BlueprintCallable, Category = "Process")
+	UFUNCTION(BlueprintCallable, Category = "Processing")
 		int GetVotersCountByIndex(int Index);
-	UFUNCTION(BlueprintCallable, Category = "Process")
+	UFUNCTION(BlueprintCallable, Category = "Processing")
 		void ProcessTimeRemaining();
-	UFUNCTION(BlueprintCallable, Category = "Process")
+	UFUNCTION(BlueprintCallable, Category = "Processing")
 		void ProcessAchievement();
-	UFUNCTION(BlueprintCallable, Category = "Process")
+	UFUNCTION(BlueprintCallable, Category = "Processing")
 		void ProcessGameResume();
-	UFUNCTION(BlueprintCallable, Category = "Process")
+	UFUNCTION(BlueprintCallable, Category = "Processing")
 		float ReturnRemainingVotesFromCurrentSeat();
-	UFUNCTION(BlueprintCallable, Category = "Process")
+	UFUNCTION(BlueprintCallable, Category = "Processing")
 		float  GetGainsBetweenNowAndLastProcessTime();
-	UFUNCTION(BlueprintCallable, Category = "Process")
+	UFUNCTION(BlueprintCallable, Category = "Processing")
 		FTimespan GetTimeSpanBetweenNowAndLastProcessTime();
 	
-	UFUNCTION(BlueprintCallable, Category = "Process")
+	UFUNCTION(BlueprintCallable, Category = "Processing")
 		void SaveCurrentGame();
+
+	UFUNCTION(BlueprintCallable, Category = "Processing")
+		void ProcessFinishedReport();
 	
 	/*UFUNCTION(BlueprintCallable, Category = "Interaction")
 	bool playerUpgrade();
@@ -91,7 +94,4 @@ public:
 
 	UPROPERTY(BlueprintAssignable, Category = "Event")
 		FShowResumeDialogue OnShowResumeDialogue;
-
-	UFUNCTION(BlueprintCallable, Category = "Process")
-		void ProcessFinishedReport();
 };

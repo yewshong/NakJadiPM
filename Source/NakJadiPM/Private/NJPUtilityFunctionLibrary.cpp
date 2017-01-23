@@ -50,3 +50,16 @@ FString UNJPUtilityFunctionLibrary::GetVictoryEnumAsString(EAchievementEnum Enum
 
 	return EnumPtr->GetEnumName((int32)EnumValue);
 }
+
+FString UNJPUtilityFunctionLibrary::ConstructPossestionText(int totalSeats, int currentSeats)
+{
+	return FString::FromInt(currentSeats) + " / " + FString::FromInt(totalSeats);
+}
+
+FString UNJPUtilityFunctionLibrary::GetAchievementEnumAsString(EAchievementEnum EnumValue)
+{
+	const UEnum* EnumPtr = FindObject<UEnum>(ANY_PACKAGE, TEXT("EAchievementEnum"), true);
+	if (!EnumPtr) return FString("Invalid");
+
+	return EnumPtr->GetEnumName((int32)EnumValue); 
+}

@@ -160,14 +160,16 @@ void AGamePlayManager::ProcessAchievement()
 {
 	if (CurrentGameData)
 	{
-		//if full win, return //
+		if (CurrentGameData->CampaignData.SeatPossessionRecord.Num() > 2)
+		{
+			if(CurrentGameData->CampaignData.SeatPossessionRecord.Num()/ CurrentGameData->CampaignData.ParlimentSeatsData.ParlimentSeats.Num() * 100 > 50)
+				CurrentGameData->CampaignData.achievement = EAchievementEnum::PrimeMinister;
+			else
+				CurrentGameData->CampaignData.achievement = EAchievementEnum::ParliamentMember;
+		}
+		else
+			CurrentGameData->CampaignData.achievement = EAchievementEnum::Candidate;
 
-		//if candidate 
-			//check if win alreayd at least 1 seat 
-		//else if MPS
-			//check if win alraedy 51% of seat
-		//else if Majority 2/3 
-			//check if win alrady 100%, set game finished = true;
 	}
 }
 
@@ -251,7 +253,7 @@ void AGamePlayManager::ProcessGameResume()
 float AGamePlayManager::GetGainsBetweenNowAndLastProcessTime()
 {
 	FTimespan IdleTimeSpan = GetTimeSpanBetweenNowAndLastProcessTime();
-	float IdleGains = FMath::Floor(IdleTimeSpan.GetTotalSeconds()) * CurrentGameData->CampaignData.VotesPerSecond;
+	float IdleGains = IdleTimeSpan.GetTotalSeconds() * CurrentGameData->CampaignData.VotesPerSecond;
 	IdleGains = UNJPUtilityFunctionLibrary::ConvertTo2Decimals(IdleGains);
 	return IdleGains;
 }

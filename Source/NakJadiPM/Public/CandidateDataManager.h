@@ -104,12 +104,8 @@ UENUM(BlueprintType)		//"BlueprintType" is essential to include
 enum class EAchievementEnum : uint8
 {
 	Candidate,
-	//StateAssemblyRepresentatives,
-	//MenteriBesar,
 	ParliamentMember,
 	PrimeMinister,
-	TwoThirdMajority,
-	FullWin
 };
 
 
