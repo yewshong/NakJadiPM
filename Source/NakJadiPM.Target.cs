@@ -8,7 +8,7 @@ public class NakJadiPMTarget : TargetRules
 	public NakJadiPMTarget(TargetInfo Target)
 	{
 		Type = TargetType.Game;
-	}
+    }
 
 	//
 	// TargetRules interface.
