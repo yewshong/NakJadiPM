@@ -30,7 +30,7 @@ void AGamePlayManager::Initialize()
 {
 	if (DataManager)
 	{
-		DataManager->BeginPlay();
+		DataManager->Init();
 		if (DataManager && DataManager->SaveGameManager)
 			CurrentGameData = DataManager->SaveGameManager->GetCampaignSaveGame();
 
@@ -58,6 +58,7 @@ void AGamePlayManager::UpdateGamePerSecond()
 	{
 		//CurrentGameData
 		CurrentGameData->CampaignData.TimeRemaining = CurrentGameData->CampaignData.TimeRemaining - UpdateTimeSpan;
+		ProcessActiveSkills();
 		ProcessVotesPerSecond();
 		ProcessParlimentSeatsResult();
 		ProcessTimeRemaining();
@@ -78,9 +79,15 @@ void AGamePlayManager::ProcessPlayerClick()
 {
 	if (CurrentGameData)
 	{
-		CurrentGameData->CampaignData.Balance += CurrentGameData->CampaignData.ClickDamage;
-		AddVotesToSeats(CurrentGameData->CampaignData.ClickDamage);
+		AddPlayerClick();
+		ProcessDoubleClick();
 	}
+}
+
+void AGamePlayManager::AddPlayerClick()
+{
+	CurrentGameData->CampaignData.Balance += CurrentGameData->CampaignData.ClickDamage;
+	AddVotesToSeats(CurrentGameData->CampaignData.ClickDamage);
 }
 
 void AGamePlayManager::ProcessPlayerUpgrade(int SkillIndex, float Cost)
@@ -150,11 +157,16 @@ void AGamePlayManager::ProcessVotesPerSecond()
 	if (CurrentGameData)
 	{
 		float IdleGains = GetGainsBetweenNowAndLastProcessTime();
-		CurrentGameData->CampaignData.Balance += IdleGains;
-		AddVotesToSeats(IdleGains);
+		AddVotes(IdleGains);
+		ProcessDoubleIdle();
 	}
 }
 
+void AGamePlayManager::AddVotes(float& gains)
+{
+	CurrentGameData->CampaignData.Balance += gains;
+	AddVotesToSeats(gains);
+}
 
 void AGamePlayManager::ProcessAchievement()
 {
@@ -237,13 +249,13 @@ void AGamePlayManager::ProcessGameResume()
 {
 	if (CurrentGameData)
 	{
-		float IdleGains = GetGainsBetweenNowAndLastProcessTime();
-		
-		CurrentGameData->CampaignData.Balance += IdleGains;
-		AddVotesToSeats(IdleGains);
-
-		if (IdleGains > 0)
-			FireShowResumeDialogueEvent(IdleGains);
+		float preProcessBalance = CurrentGameData->CampaignData.Balance;
+		float Gains = GetGainsBetweenNowAndLastProcessTime();		
+		AddVotes(Gains);
+		ProcessDoubleIdle();
+		Gains = CurrentGameData->CampaignData.Balance - preProcessBalance;
+		if (Gains > 0)
+			FireShowResumeDialogueEvent(Gains); 
 
 		CurrentGameData->CampaignData.TimeRemaining = CurrentGameData->CampaignData.TimeRemaining - GetTimeSpanBetweenNowAndLastProcessTime();
 		CurrentGameData->CampaignData.LastProcessTime = FDateTime::Now();
@@ -286,6 +298,95 @@ void AGamePlayManager::ProcessFinishedReport()
 	}
 }
 
+void AGamePlayManager::ProcessVideoReward(EAdsRequestType requestType, EActiveSkillType skillType)
+{
+	if (requestType == EAdsRequestType::Skill )
+	{
+		if (CurrentGameData && DataManager)
+		{
+			for (int i = 0; i < CurrentGameData->CampaignData.ActiveSkillData.ActiveSkills.Num(); i++)
+			{
+				if (CurrentGameData->CampaignData.ActiveSkillData.ActiveSkills[i].SkillType == skillType)
+				{
+					AddActiveSkill(CurrentGameData->CampaignData.ActiveSkillData.ActiveSkills[i]);
+					break;
+				}
+			}
+		}
+	}
+}
+
+void  AGamePlayManager::AddActiveSkill(FActiveSkill skill)
+{
+	if (CurrentGameData && DataManager)
+	{
+		bool activated = false;
+		//if no existing
+		for(int i = 0; i < CurrentGameData->CampaignData.ActivatedSkillRecord.Num(); i++)
+		{
+			if (CurrentGameData->CampaignData.ActivatedSkillRecord[i].SkillType == skill.SkillType)
+			{
+				CurrentGameData->CampaignData.ActivatedSkillRecord[i].EndTime += skill.Duration;
+				activated = true;
+				break;
+			}
+		}
+
+		if(!activated)
+		{
+			FActivatedSkill newActivatedSkill = FActivatedSkill();
+			newActivatedSkill.SkillType = skill.SkillType;
+			newActivatedSkill.StartTime = FDateTime::Now();
+			newActivatedSkill.EndTime = newActivatedSkill.StartTime + skill.Duration;
+			CurrentGameData->CampaignData.ActivatedSkillRecord.Add(newActivatedSkill);
+		}
+	}
+}
+
+void AGamePlayManager::ProcessActiveSkills()
+{
+	for (int i = 0; i < CurrentGameData->CampaignData.ActivatedSkillRecord.Num(); i++)
+	{
+		if (CurrentGameData->CampaignData.ActivatedSkillRecord[i].EndTime < FDateTime::Now())
+		{
+			CurrentGameData->CampaignData.ActivatedSkillRecord.RemoveAt(i);
+			ProcessActiveSkills();
+			break;
+		}
+	}
+}
+
+void AGamePlayManager::ProcessDoubleClick()
+{
+	for (int i = 0; i < CurrentGameData->CampaignData.ActivatedSkillRecord.Num(); i++)
+	{
+		if (CurrentGameData->CampaignData.ActivatedSkillRecord[i].SkillType == EActiveSkillType::DoubleClick)
+		{
+			AddPlayerClick();
+			break;
+		}
+	}
+}
+
+void AGamePlayManager::ProcessDoubleIdle()
+{
+	for (int i = 0; i < CurrentGameData->CampaignData.ActivatedSkillRecord.Num(); i++)
+	{
+		if (CurrentGameData->CampaignData.ActivatedSkillRecord[i].SkillType == EActiveSkillType::DoubleIdle)
+		{
+			float IdleGains = GetGainsBetweenNowAndLastProcessTime();
+			FTimespan IdleTimeSpan = GetTimeSpanBetweenNowAndLastProcessTime();
+			FTimespan timeSpanToEnd = CurrentGameData->CampaignData.ActivatedSkillRecord[i].EndTime - FDateTime::Now();
+			if (timeSpanToEnd < IdleTimeSpan)
+			{
+				IdleGains = timeSpanToEnd.GetTotalSeconds() * CurrentGameData->CampaignData.VotesPerSecond;
+				IdleGains = UNJPUtilityFunctionLibrary::ConvertTo2Decimals(IdleGains);
+			}
+			AddVotes(IdleGains);
+			break;
+		}
+	}
+}
 
 
 

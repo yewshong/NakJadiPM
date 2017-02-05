@@ -15,7 +15,16 @@ AGeneralDataManager::AGeneralDataManager()
 void AGeneralDataManager::BeginPlay()
 {
 	Super::BeginPlay();
-	SaveGameManager = (ASaveGameManager*)GetWorld()->SpawnActor(ASaveGameManager::StaticClass());
+	Init();
+}
+
+void AGeneralDataManager::Init()
+{
+	if (!inited)
+	{
+		SaveGameManager = (ASaveGameManager*)GetWorld()->SpawnActor(ASaveGameManager::StaticClass());
+		inited = true;
+	}
 }
 
 // Called every frame
@@ -24,16 +33,17 @@ void AGeneralDataManager::Tick( float DeltaTime )
 	Super::Tick( DeltaTime );
 }
 
-void AGeneralDataManager::ContrustAllDataFromDataTable()
+void AGeneralDataManager:: ConstructAllDataFromDataTable()
 {
-	ContrustElectionDataFromDataTable();
-	ContsructCandidateDataFromDataTable();
-	ContsructStatesDataFromDataTable();
-	ContsructSkillsCostDataFromDataTable();
+	ConstructElectionDataFromDataTable();
+	ConstructCandidateDataFromDataTable();
+	ConstructStatesDataFromDataTable();
+	ConstructSkillsDataFromDataTable();
+	ConstructActivateSkillsDataFromDataTable();
 }
 
 
-void AGeneralDataManager::ContrustElectionDataFromDataTable()
+void AGeneralDataManager::ConstructElectionDataFromDataTable()
 {	 
 	ParlimentSeatsData = FAllParlimentSeatsData();
 	ParlimentSeatsData.Version = DataVersion;
@@ -59,7 +69,7 @@ void AGeneralDataManager::ContrustElectionDataFromDataTable()
 		UE_LOG(LogTemp, Warning, TEXT("ParlimentSeats variable is not set =.='"));
 }
 
-void AGeneralDataManager::ContsructCandidateDataFromDataTable()
+void AGeneralDataManager::ConstructCandidateDataFromDataTable()
 {
 	CandidatesData = FAllCandidatesData();
 	CandidatesData.Version = DataVersion;
@@ -85,7 +95,7 @@ void AGeneralDataManager::ContsructCandidateDataFromDataTable()
 		UE_LOG(LogTemp, Warning, TEXT("Candidate variable is not set =.='"));
 }
 
-void AGeneralDataManager::ContsructStatesDataFromDataTable()
+void AGeneralDataManager::ConstructStatesDataFromDataTable()
 {
 	StatesData = FAllStatesData();
 	StatesData.Version = DataVersion;
@@ -110,7 +120,7 @@ void AGeneralDataManager::ContsructStatesDataFromDataTable()
 		UE_LOG(LogTemp, Warning, TEXT("States data variable is not set =.='"));
 }
 
-void AGeneralDataManager::ContsructSkillsCostDataFromDataTable()
+void AGeneralDataManager::ConstructSkillsDataFromDataTable()
 {
 	SkillsCostData = FAllSkillCostData();
 	SkillsCostData.Version = DataVersion;
@@ -133,6 +143,31 @@ void AGeneralDataManager::ContsructSkillsCostDataFromDataTable()
 	}
 	else
 		UE_LOG(LogTemp, Warning, TEXT("SkillCost data return false =.='"));
+}
+
+void AGeneralDataManager::ConstructActivateSkillsDataFromDataTable()
+{
+	ActivateSkillsData = FAllActiveSkillsData();
+	ActivateSkillsData.Version = DataVersion;
+	if (ActivateSkillsDataTable)
+	{
+		int RowIndex = 1;
+		bool TimetoBreak = false;
+		while (!TimetoBreak)
+		{
+			FName FindRowName = FName(*FString::FromInt(RowIndex));
+			FActiveSkill* Row = SkillsCostDataTable->FindRow<FActiveSkill>(FindRowName, FString(""));
+			if (Row)
+			{
+				ActivateSkillsData.ActiveSkills.Add(*Row);
+				RowIndex++;
+			}
+			else
+				TimetoBreak = true;
+		}
+	}
+	else
+		UE_LOG(LogTemp, Warning, TEXT("Active Skill data return false =.='"));
 }
 
 bool AGeneralDataManager::GameSaveDataExists()
@@ -161,6 +196,7 @@ bool AGeneralDataManager::CreateNewAndSaveGame(FCandidate SelectedCandidate)
 	CampaignData.ParlimentSeatsData = ParlimentSeatsData;
 	CampaignData.StatesData = StatesData;
 	CampaignData.SkillsCostData = SkillsCostData;
+	CampaignData.ActiveSkillData = ActivateSkillsData;
 
 	for (int i = 0; i < SkillsCostData.SkillCosts.Num(); i++)
 	{

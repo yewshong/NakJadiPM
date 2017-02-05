@@ -52,7 +52,12 @@ public:
 		void ProcessPlayerClick();
 	UFUNCTION(BlueprintCallable, Category = "Interaction")
 		void ProcessPlayerUpgrade(int SkillIndex, float Cost);
-	
+	UFUNCTION(BlueprintCallable, Category = "Interaction")
+		void AddActiveSkill(FActiveSkill skill);
+
+		void AddPlayerClick();//refractor from processplayer click to use in double click skill too
+		void AddVotes(float& gains);//refractor from processVotesPerSecond to use in double skill
+
 	UFUNCTION(BlueprintCallable, Category = "Processing")
 		void ProcessParlimentSeatsResult();
 	UFUNCTION(BlueprintCallable, Category = "Processing")
@@ -79,6 +84,16 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "Processing")
 		void ProcessFinishedReport();
+
+	UFUNCTION(BlueprintCallable, Category = "Processing")
+		void ProcessVideoReward(EAdsRequestType requestType,EActiveSkillType skillType);
+
+	UFUNCTION(BlueprintCallable, Category = "Processing")
+		void ProcessActiveSkills();
+	UFUNCTION(BlueprintCallable, Category = "Processing")
+		void ProcessDoubleClick();
+	UFUNCTION(BlueprintCallable, Category = "Processing")
+		void ProcessDoubleIdle();
 	
 	/*UFUNCTION(BlueprintCallable, Category = "Interaction")
 	bool playerUpgrade();

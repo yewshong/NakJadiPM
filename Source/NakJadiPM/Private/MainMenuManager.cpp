@@ -16,6 +16,10 @@ AMainMenuManager::AMainMenuManager()
 void AMainMenuManager::BeginPlay()
 {
 	Super::BeginPlay();
+	if (DataManager)
+	{
+		DataManager->Init();
+	}
 }
 
 // Called every frame

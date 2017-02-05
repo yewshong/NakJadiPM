@@ -63,13 +63,68 @@ struct FSkillUpgradeInfo
 
 };
 
+UENUM(BlueprintType)
+enum class EAdsRequestType : uint8
+{
+	Skill,
+	Coin,
+};
+
+UENUM(BlueprintType)
+enum class EActiveSkillType : uint8
+{
+	DoubleClick,
+	DoubleIdle,
+};
+
+USTRUCT(BlueprintType)
+struct FActiveSkill : public FTableRowBase
+{
+	GENERATED_USTRUCT_BODY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+		EActiveSkillType SkillType;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+		FString DisplayName;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+		FTimespan Duration;
+};
+
+USTRUCT(BlueprintType)
+struct FAllActiveSkillsData : public FTableRowBase
+{
+	GENERATED_USTRUCT_BODY()
+
+		UPROPERTY(EditAnywhere, BlueprintReadWrite)
+		FString Version;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+		TArray<FActiveSkill> ActiveSkills;
+
+	FAllActiveSkillsData()
+	{
+		ActiveSkills = TArray<FActiveSkill>();
+	}
+};
+
+USTRUCT(BlueprintType)
+struct FActivatedSkill : public FTableRowBase
+{
+	GENERATED_USTRUCT_BODY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+		EActiveSkillType SkillType;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+		FDateTime EndTime;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+		FDateTime StartTime;
+};
+
 USTRUCT(BlueprintType)
 struct FCandidate : public FTableRowBase
 {
 	GENERATED_USTRUCT_BODY()
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FString Name;
+		FString Name;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TArray<FString> Skills;
@@ -88,7 +143,7 @@ struct FAllCandidatesData : public FTableRowBase
 {
 	GENERATED_USTRUCT_BODY()
 
-		UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 		FString Version;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
@@ -107,7 +162,6 @@ enum class EAchievementEnum : uint8
 	ParliamentMember,
 	PrimeMinister,
 };
-
 
 USTRUCT(BlueprintType)
 struct FCurrentCampaignData
@@ -158,11 +212,17 @@ struct FCurrentCampaignData
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
 		FAllSkillCostData SkillsCostData;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
+		FAllActiveSkillsData ActiveSkillData;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TArray<FParlimentSeatResult> SeatPossessionRecord;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TArray<FSkillUpgradeInfo> SkillUpgradeRecord;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TArray<FActivatedSkill> ActivatedSkillRecord;
 
 	FCurrentCampaignData()
 	{

@@ -1,0 +1,9 @@
+{
+	"Changelist" : 3249277,
+	"CompatibleChangelist" : 3195953,
+	"BuildId" : "755aed3d-6a5d-44b1-8dce-623ae6995c7c",
+	"Modules" : 
+	{
+		"Vungle" : "UE4Editor-Vungle-4297.dll"
+	}
+}

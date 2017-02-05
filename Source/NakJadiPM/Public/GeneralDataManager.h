@@ -18,7 +18,8 @@ public:
 
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
-	
+	void Init();
+	bool inited = false;
 	// Called every frame
 	virtual void Tick( float DeltaSeconds ) override;
 	UPROPERTY(VisibleAnywhere, Category = "DataTable")
@@ -35,21 +36,27 @@ public:
 
 	UPROPERTY(EditAnywhere, Category = "DataTable")
 		UDataTable* SkillsCostDataTable;
+
+	UPROPERTY(EditAnywhere, Category = "DataTable")
+		UDataTable* ActivateSkillsDataTable;
 	
 	UFUNCTION(BlueprintCallable, Category = "DataTable")
-		void ContrustAllDataFromDataTable();
+		void ConstructAllDataFromDataTable();
 
 	UFUNCTION(BlueprintCallable, Category = "DataTable")
-		void ContrustElectionDataFromDataTable();
+		void ConstructElectionDataFromDataTable();
 
 	UFUNCTION(BlueprintCallable, Category = "DataTable")
-		void ContsructCandidateDataFromDataTable();
+		void ConstructCandidateDataFromDataTable();
 
 	UFUNCTION(BlueprintCallable, Category = "DataTable")
-		void ContsructStatesDataFromDataTable();
+		void ConstructStatesDataFromDataTable();
 
 	UFUNCTION(BlueprintCallable, Category = "DataTable")
-		void ContsructSkillsCostDataFromDataTable();
+		void ConstructSkillsDataFromDataTable();
+	
+	UFUNCTION(BlueprintCallable, Category = "DataTable")
+		void ConstructActivateSkillsDataFromDataTable();
 
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
@@ -63,6 +70,9 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
 		FAllSkillCostData SkillsCostData;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
+		FAllActiveSkillsData ActivateSkillsData;
 	
 	UFUNCTION(BlueprintCallable, Category = "SaveData")
 	bool GameSaveDataExists();
