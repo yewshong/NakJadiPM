@@ -35,7 +35,9 @@ void AGamePlayManager::Initialize()
 			CurrentGameData = DataManager->SaveGameManager->GetCampaignSaveGame();
 
 		ProcessParlimentSeatsResult();
-		ProcessGameResume();
+		ProcessGameResume();	
+		if (GEngine)
+			GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Blue, TEXT("number of active skill record :" + FString::FromInt(CurrentGameData->CampaignData.ActiveSkillData.ActiveSkills.Num())));
 
 		FTimerHandle GameUpdateTimerHandle = FTimerHandle();
 		GetWorldTimerManager().SetTimer(GameUpdateTimerHandle, this, &AGamePlayManager::UpdateGamePerSecond, UpdateTimeSpan.GetSeconds(), true);
@@ -172,7 +174,7 @@ void AGamePlayManager::ProcessAchievement()
 {
 	if (CurrentGameData)
 	{
-		if (CurrentGameData->CampaignData.SeatPossessionRecord.Num() > 2)
+		if (CurrentGameData->CampaignData.SeatPossessionRecord.Num() >= 2)
 		{
 			if(CurrentGameData->CampaignData.SeatPossessionRecord.Num()/ CurrentGameData->CampaignData.ParlimentSeatsData.ParlimentSeats.Num() * 100 > 50)
 				CurrentGameData->CampaignData.achievement = EAchievementEnum::PrimeMinister;
@@ -208,16 +210,6 @@ void AGamePlayManager::AddVotesToSeats(float VoteCount)
 			if (VotesCurrent > 0)
 				AddVotesToSeats(VotesCurrent);
 		}
-		
-		/*while(VotesCurrent > 0)
-		{
-			VotesRemaining = ReturnRemainingVotesFromCurrentSeat();
-			VotesCurrent -= VotesRemaining;
-			CurrentGameData->CampaignData.SeatPossessionRecord.Last().possesion += VotesRemaining;
-			ProcessParlimentSeatsResult();
-			if (CurrentGameData->CampaignData.Finished)
-				break;
-		}*/
 	}
 }
 
@@ -300,20 +292,31 @@ void AGamePlayManager::ProcessFinishedReport()
 
 void AGamePlayManager::ProcessVideoReward(EAdsRequestType requestType, EActiveSkillType skillType)
 {
+
+	if (GEngine)
+		GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Blue, TEXT("Begin ProcessVideoReward"));
 	if (requestType == EAdsRequestType::Skill )
 	{
 		if (CurrentGameData && DataManager)
 		{
+
+			if (GEngine)
+				GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Blue, TEXT("number of active skill record :"+ FString::FromInt(CurrentGameData->CampaignData.ActiveSkillData.ActiveSkills.Num())));
+
 			for (int i = 0; i < CurrentGameData->CampaignData.ActiveSkillData.ActiveSkills.Num(); i++)
 			{
 				if (CurrentGameData->CampaignData.ActiveSkillData.ActiveSkills[i].SkillType == skillType)
 				{
+					if (GEngine)
+						GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Blue, TEXT("Skill Type Found"));
 					AddActiveSkill(CurrentGameData->CampaignData.ActiveSkillData.ActiveSkills[i]);
 					break;
 				}
 			}
 		}
 	}
+	if (GEngine)
+		GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Blue, TEXT("Finished ProcessVideoReward"));
 }
 
 void  AGamePlayManager::AddActiveSkill(FActiveSkill skill)

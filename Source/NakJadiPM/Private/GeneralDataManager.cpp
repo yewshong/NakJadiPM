@@ -156,7 +156,7 @@ void AGeneralDataManager::ConstructActivateSkillsDataFromDataTable()
 		while (!TimetoBreak)
 		{
 			FName FindRowName = FName(*FString::FromInt(RowIndex));
-			FActiveSkill* Row = SkillsCostDataTable->FindRow<FActiveSkill>(FindRowName, FString(""));
+			FActiveSkill* Row = ActivateSkillsDataTable->FindRow<FActiveSkill>(FindRowName, FString(""));
 			if (Row)
 			{
 				ActivateSkillsData.ActiveSkills.Add(*Row);
@@ -186,8 +186,6 @@ bool  AGeneralDataManager::GameSaveDataExpired()
 
 bool AGeneralDataManager::CreateNewAndSaveGame(FCandidate SelectedCandidate)
 {
-	if (GEngine)
-	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, TEXT("Entered into create New And Save Game"));
 	FCurrentCampaignData CampaignData = FCurrentCampaignData();
 	//add populate data from struct
 	
@@ -211,8 +209,6 @@ bool AGeneralDataManager::CreateNewAndSaveGame(FCandidate SelectedCandidate)
 	if (SaveGameManager)
 		return SaveGameManager->CreateNewAndSaveGame(CampaignData);
 	else {
-		if (GEngine)
-			GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, TEXT("Create New And Save Game:Save Game Manager is null"));
 		return false;
 	}
 }

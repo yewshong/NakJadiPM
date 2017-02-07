@@ -74,16 +74,10 @@ bool ASaveGameManager::DeleteSaveGame()
 
 	if (UGameplayStatics::DeleteGameInSlot(CurrentSaveGame->SaveSlotName, CurrentSaveGame->UserIndex))
 	{
-
-		if (GEngine)
-			GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, TEXT("DeleteGameInSlot success"));
 		return true;
 	}
 	else
 	{
-
-		if (GEngine)
-			GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, TEXT("DeleteGameInSlot failed"));
 		return false;
 	}
 }
