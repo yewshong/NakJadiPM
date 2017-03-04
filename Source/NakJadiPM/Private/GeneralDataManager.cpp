@@ -170,6 +170,7 @@ void AGeneralDataManager::ConstructActivateSkillsDataFromDataTable()
 		UE_LOG(LogTemp, Warning, TEXT("Active Skill data return false =.='"));
 }
 
+
 bool AGeneralDataManager::GameSaveDataExists()
 {
 	if (SaveGameManager)

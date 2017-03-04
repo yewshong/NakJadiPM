@@ -5,6 +5,9 @@
 #include "NJPUtilityFunctionLibrary.h"
 #include "SaveGameManager.h"
 #include "GeneralDataManager.h"
+#include "HexMapDataManager.h"
+#include "HexagonGrid.h"
+#include "HexagonTile.h"
 #include "GameFramework/Actor.h"
 #include "GamePlayManager.generated.h"
 
@@ -32,6 +35,12 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
 		UCampaignSaveGame* CurrentGameData = nullptr;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
+		AHexMapDataManager* HexMapDataManager = nullptr;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
+		AHexagonGrid* HexagonGrid = nullptr;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
 		int ClickSkillIndex = 0;
@@ -86,12 +95,14 @@ public:
 		void ProcessFinishedReport();
 
 	UFUNCTION(BlueprintCallable, Category = "Processing")
-		void ProcessVideoReward(EAdsRequestType requestType,EActiveSkillType skillType);
+		void ProcessVideoRewardAfterPlayed(EAdsRequestType requestType,EActiveSkillType skillType);
 
 	UFUNCTION(BlueprintCallable, Category = "Processing")
 		void ProcessActiveSkills();
 	UFUNCTION(BlueprintCallable, Category = "Processing")
 		void ProcessDoubleClick();
+	UFUNCTION(BlueprintCallable, Category = "Processing")
+		bool IsDoubleClickActivated();
 	UFUNCTION(BlueprintCallable, Category = "Processing")
 		void ProcessDoubleIdle();
 	
@@ -109,4 +120,10 @@ public:
 
 	UPROPERTY(BlueprintAssignable, Category = "Event")
 		FShowResumeDialogue OnShowResumeDialogue;
+
+
+	UFUNCTION(BlueprintCallable, Category = "HexMap")
+		void InitHexMap();
+	UFUNCTION(BlueprintCallable, Category = "HexMap")
+		void UpdateHexMap();
 };

@@ -44,7 +44,7 @@ void AGamePlayManager::Initialize()
 		
 		FTimerHandle AutoSaveTimerHandle = FTimerHandle();
 		GetWorldTimerManager().SetTimer(AutoSaveTimerHandle, this, &AGamePlayManager::SaveCurrentGame, UpdateTimeSpan.GetSeconds(), true);
-		
+		InitHexMap();
 	}
 }
 
@@ -290,7 +290,7 @@ void AGamePlayManager::ProcessFinishedReport()
 	}
 }
 
-void AGamePlayManager::ProcessVideoReward(EAdsRequestType requestType, EActiveSkillType skillType)
+void AGamePlayManager::ProcessVideoRewardAfterPlayed(EAdsRequestType requestType, EActiveSkillType skillType)
 {
 
 	if (GEngine)
@@ -371,6 +371,18 @@ void AGamePlayManager::ProcessDoubleClick()
 	}
 }
 
+bool AGamePlayManager::IsDoubleClickActivated()
+{
+	for (int i = 0; i < CurrentGameData->CampaignData.ActivatedSkillRecord.Num(); i++)
+	{
+		if (CurrentGameData->CampaignData.ActivatedSkillRecord[i].SkillType == EActiveSkillType::DoubleClick)
+		{
+			return true;
+		}
+	}
+	return false;
+}
+
 void AGamePlayManager::ProcessDoubleIdle()
 {
 	for (int i = 0; i < CurrentGameData->CampaignData.ActivatedSkillRecord.Num(); i++)
@@ -392,4 +404,14 @@ void AGamePlayManager::ProcessDoubleIdle()
 }
 
 
+void  AGamePlayManager::InitHexMap()
+{
+	if (HexagonGrid && HexMapDataManager->MalaysiaHexMapDataTable)
+	{
+		HexagonGrid->AllTilesInfo = HexMapDataManager->MalaysiaHexMapTilesData;
+		HexagonGrid->InitGrid(); 
+	}
+}
+void  AGamePlayManager::UpdateHexMap()
+{}
 

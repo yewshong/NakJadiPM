@@ -59,6 +59,7 @@ public:
 		void ConstructActivateSkillsDataFromDataTable();
 
 
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
 	FAllCandidatesData CandidatesData;
 
