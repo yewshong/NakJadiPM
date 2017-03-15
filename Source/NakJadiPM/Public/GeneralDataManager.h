@@ -32,6 +32,9 @@ public:
 		UDataTable* CandidatesDataTable;
 
 	UPROPERTY(EditAnywhere, Category = "DataTable")
+		UDataTable* PoliticPartiesDataTable;
+
+	UPROPERTY(EditAnywhere, Category = "DataTable")
 		UDataTable* StatesDataTable;
 
 	UPROPERTY(EditAnywhere, Category = "DataTable")
@@ -48,6 +51,8 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "DataTable")
 		void ConstructCandidateDataFromDataTable();
+	UFUNCTION(BlueprintCallable, Category = "DataTable")
+		void ConstrucPoliticPartyDataFromDataTable();
 
 	UFUNCTION(BlueprintCallable, Category = "DataTable")
 		void ConstructStatesDataFromDataTable();
@@ -57,12 +62,14 @@ public:
 	
 	UFUNCTION(BlueprintCallable, Category = "DataTable")
 		void ConstructActivateSkillsDataFromDataTable();
-
-
+	
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
 	FAllCandidatesData CandidatesData;
-
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
+	FAllPoliticPartyData PoliticPartiesData;
+	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
 	FAllParlimentSeatsData ParlimentSeatsData;
 
@@ -83,7 +90,7 @@ public:
 	//void CreateNewGameSaveData();
 
 	UFUNCTION(BlueprintCallable, Category = "SaveData")
-	bool CreateNewAndSaveGame(FCandidate SelectedCandidate);
+	bool CreateNewAndSaveGame(FCandidate SelectedCandidate,	FPoliticParty SelectedParty);
 	
 	UFUNCTION(BlueprintCallable, Category = "SaveData")
 	bool DeleteSaveGame();
@@ -93,4 +100,7 @@ public:
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "SaveData")
 	ASaveGameManager* SaveGameManager = nullptr;
+
+	UFUNCTION(BlueprintCallable, Category = "SaveData")
+		int GetRandomOpponentIndex(FString SelectedCandidateName);
 };

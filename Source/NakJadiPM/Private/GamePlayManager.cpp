@@ -34,17 +34,17 @@ void AGamePlayManager::Initialize()
 		if (DataManager && DataManager->SaveGameManager)
 			CurrentGameData = DataManager->SaveGameManager->GetCampaignSaveGame();
 
-		ProcessParlimentSeatsResult();
-		ProcessGameResume();	
-		if (GEngine)
-			GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Blue, TEXT("number of active skill record :" + FString::FromInt(CurrentGameData->CampaignData.ActiveSkillData.ActiveSkills.Num())));
+		if (CurrentGameData)
+		{
+			ProcessParlimentSeatsResult();
+			ProcessGameResume();
 
-		FTimerHandle GameUpdateTimerHandle = FTimerHandle();
-		GetWorldTimerManager().SetTimer(GameUpdateTimerHandle, this, &AGamePlayManager::UpdateGamePerSecond, UpdateTimeSpan.GetSeconds(), true);
-		
-		FTimerHandle AutoSaveTimerHandle = FTimerHandle();
-		GetWorldTimerManager().SetTimer(AutoSaveTimerHandle, this, &AGamePlayManager::SaveCurrentGame, UpdateTimeSpan.GetSeconds(), true);
-		InitHexMap();
+			FTimerHandle GameUpdateTimerHandle = FTimerHandle();
+			GetWorldTimerManager().SetTimer(GameUpdateTimerHandle, this, &AGamePlayManager::UpdateGamePerSecond, UpdateTimeSpan.GetSeconds(), true);
+
+			FTimerHandle AutoSaveTimerHandle = FTimerHandle();
+			GetWorldTimerManager().SetTimer(AutoSaveTimerHandle, this, &AGamePlayManager::SaveCurrentGame, UpdateTimeSpan.GetSeconds(), true);
+		}
 	}
 }
 
@@ -125,23 +125,26 @@ void AGamePlayManager::ProcessParlimentSeatsResult()
 			FParlimentSeatResult SeatResult = FParlimentSeatResult();
 			SeatResult.Index = 0;
 			SeatResult.possesion = 0;
+			//todo add candidate
+			SeatResult.OpponentIndex = DataManager->GetRandomOpponentIndex(CurrentGameData->CampaignData.SelectedCandidate.Name);
+			SeatResult.OpponentVPS = OpponentBaseVPS + (OpponentVPSAddictive*SeatResult.Index);
 			CurrentGameData->CampaignData.SeatPossessionRecord.Add(SeatResult);
 		}
 		else
 		{
 			FParlimentSeatResult CurrentSeatResult = CurrentGameData->CampaignData.SeatPossessionRecord.Last();
 
-			if (CurrentSeatResult.possesion >= GetVotersCountByIndex(CurrentGameData->CampaignData.SeatPossessionRecord.Num() - 1))
+			UE_LOG(LogTemp, Warning, TEXT("CurrentSeatPossesion: %f "), CurrentSeatResult.possesion);
+			//if (CurrentSeatResult.possesion >= GetVotersCountByIndex(CurrentGameData->CampaignData.SeatPossessionRecord.Num() - 1))
+			if ((float)(CurrentSeatResult.possesion)/GetVotersCountByIndex(CurrentGameData->CampaignData.SeatPossessionRecord.Num() - 1)*100 > WinPercentageThreshold)
 			{
 				if (CurrentGameData->CampaignData.SeatPossessionRecord.Num() < CurrentGameData->CampaignData.ParlimentSeatsData.ParlimentSeats.Num())
 				{
-					UE_LOG(LogTemp, Warning, TEXT("New Seat need to add after index : %d, Last Seat Possesion : %f @ Voter Count : %f,"), 
-						CurrentGameData->CampaignData.SeatPossessionRecord.Num() - 1,
-						CurrentSeatResult.possesion, 
-						GetVotersCountByIndex(CurrentGameData->CampaignData.SeatPossessionRecord.Num() - 1));
 					FParlimentSeatResult SeatResult = FParlimentSeatResult();
 					SeatResult.Index = CurrentGameData->CampaignData.SeatPossessionRecord.Num();
 					SeatResult.possesion = 0;
+					SeatResult.OpponentIndex = DataManager->GetRandomOpponentIndex(CurrentGameData->CampaignData.SelectedCandidate.Name);
+					SeatResult.OpponentVPS = OpponentBaseVPS + (OpponentVPSAddictive*SeatResult.Index);
 					CurrentGameData->CampaignData.SeatPossessionRecord.Add(SeatResult);
 				}
 				else
@@ -158,6 +161,17 @@ void AGamePlayManager::ProcessVotesPerSecond()
 {
 	if (CurrentGameData)
 	{
+		//float IdleGains = GetVPSGainsBetweenNowAndLastProcessTime(CurrentGameData->CampaignData.VotesPerSecond);
+		//float OpponentGains = GetVPSGainsBetweenNowAndLastProcessTime(CurrentGameData->CampaignData.SeatPossessionRecord.Last().OpponentVPS);
+		FTimespan GainTimeSpan = GetTimeSpanBetweenNowAndLastProcessTime();
+		FTimespan doubleIdleTimeSpan = GetDoubleIdleTimeSpanBetweenNowAndLastProcessTime();
+
+		ProcessByTimeSpan(GainTimeSpan, doubleIdleTimeSpan);
+
+	}
+	return;
+	if (CurrentGameData)
+	{
 		float IdleGains = GetGainsBetweenNowAndLastProcessTime();
 		AddVotes(IdleGains);
 		ProcessDoubleIdle();
@@ -168,6 +182,27 @@ void AGamePlayManager::AddVotes(float& gains)
 {
 	CurrentGameData->CampaignData.Balance += gains;
 	AddVotesToSeats(gains);
+}
+
+void AGamePlayManager::ProcessByTimeSpan(FTimespan GainTimeSpan, FTimespan doubleIdleTimeSpan)
+{
+	FTimespan playerTimeSpan = GainTimeSpan + doubleIdleTimeSpan;
+	FTimespan OpponentTimeSpan = GainTimeSpan;
+	CurrentGameData->CampaignData.Balance += playerTimeSpan.GetTotalSeconds()*
+		CurrentGameData->CampaignData.VotesPerSecond;
+	UE_LOG(LogTemp, Warning, TEXT("Total seconds to be process are %f"), playerTimeSpan.GetTotalSeconds());
+	UE_LOG(LogTemp, Warning, TEXT("Total GainTimeSpan seconds to be process are %f"), GainTimeSpan.GetTotalSeconds());
+	UE_LOG(LogTemp, Warning, TEXT("Total doubleIdle seconds to be process are %f"), doubleIdleTimeSpan.GetTotalSeconds());
+	
+	for (int i = 0; i < playerTimeSpan.GetTotalSeconds(); i++)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Process %d second"), i);
+		if (i > TotalSecondsInOneDay) return;
+		if(i < OpponentTimeSpan.GetTotalSeconds())
+			AddVotesToSeatsBySec(true);
+		else 
+			AddVotesToSeatsBySec(false);
+	}
 }
 
 void AGamePlayManager::ProcessAchievement()
@@ -213,6 +248,39 @@ void AGamePlayManager::AddVotesToSeats(float VoteCount)
 	}
 }
 
+void AGamePlayManager::AddVotesToSeatsBySec(bool opponentAlso)
+{
+	if (CurrentGameData->CampaignData.SeatPossessionRecord.Num() > 0)
+	{
+		FParlimentSeatResult * CurrentResult = &CurrentGameData->CampaignData.SeatPossessionRecord.Last();
+
+		CurrentResult->possesion += CurrentGameData->CampaignData.VotesPerSecond;
+		CurrentResult->possesion = FMath::Clamp(CurrentResult->possesion, 0.0f, (float)GetVotersCountByIndex(CurrentResult->Index));
+		
+		float bringOverToOpponent = FMath::Clamp(CurrentResult->possesion + 
+							CurrentResult->OpponentPossesion - 
+							GetVotersCountByIndex(CurrentResult->Index), 
+							0.0f, CurrentGameData->CampaignData.VotesPerSecond);
+		
+		CurrentResult->OpponentPossesion -= bringOverToOpponent;
+
+		if (opponentAlso)
+		{
+			CurrentResult->OpponentPossesion += CurrentResult->OpponentVPS;
+
+			CurrentResult->OpponentPossesion = FMath::Clamp(CurrentResult->OpponentPossesion, 0.0f, (float)GetVotersCountByIndex(CurrentResult->Index));
+
+			float bringOverToCandidate = FMath::Clamp(CurrentResult->possesion +
+				CurrentResult->OpponentPossesion -
+				GetVotersCountByIndex(CurrentResult->Index),
+				0.0f, CurrentResult->OpponentVPS);
+
+			CurrentResult->possesion -= bringOverToCandidate;
+		}
+
+		ProcessParlimentSeatsResult();
+	}
+}
 
 float AGamePlayManager::ReturnRemainingVotesFromCurrentSeat()
 {
@@ -241,13 +309,18 @@ void AGamePlayManager::ProcessGameResume()
 {
 	if (CurrentGameData)
 	{
-		float preProcessBalance = CurrentGameData->CampaignData.Balance;
+		/*float preProcessBalance = CurrentGameData->CampaignData.Balance;
 		float Gains = GetGainsBetweenNowAndLastProcessTime();		
 		AddVotes(Gains);
 		ProcessDoubleIdle();
 		Gains = CurrentGameData->CampaignData.Balance - preProcessBalance;
 		if (Gains > 0)
-			FireShowResumeDialogueEvent(Gains); 
+			FireShowResumeDialogueEvent(Gains); */
+		float preProcessBalance = CurrentGameData->CampaignData.Balance;
+		ProcessVotesPerSecond();
+		float Gains = CurrentGameData->CampaignData.Balance - preProcessBalance;
+		if (Gains > 0 && !CurrentGameData->CampaignData.Finished)
+			FireShowResumeDialogueEvent(Gains);
 
 		CurrentGameData->CampaignData.TimeRemaining = CurrentGameData->CampaignData.TimeRemaining - GetTimeSpanBetweenNowAndLastProcessTime();
 		CurrentGameData->CampaignData.LastProcessTime = FDateTime::Now();
@@ -262,6 +335,14 @@ float AGamePlayManager::GetGainsBetweenNowAndLastProcessTime()
 	return IdleGains;
 }
 
+float AGamePlayManager::GetVPSGainsBetweenNowAndLastProcessTime(float &VPS)
+{
+	FTimespan IdleTimeSpan = GetTimeSpanBetweenNowAndLastProcessTime();
+	float IdleGains = IdleTimeSpan.GetTotalSeconds() * VPS;
+	IdleGains = UNJPUtilityFunctionLibrary::ConvertTo2Decimals(IdleGains);
+	return IdleGains;
+}
+
 FTimespan AGamePlayManager::GetTimeSpanBetweenNowAndLastProcessTime()
 {
 	FTimespan IdleTimeSpan;
@@ -269,10 +350,36 @@ FTimespan AGamePlayManager::GetTimeSpanBetweenNowAndLastProcessTime()
 		IdleTimeSpan = FDateTime::Now() - CurrentGameData->CampaignData.LastProcessTime;
 	else
 	{
-		IdleTimeSpan = CurrentGameData->CampaignData.EndTime - CurrentGameData->CampaignData.LastSavedTime;
+		if (CurrentGameData->CampaignData.EndTime > CurrentGameData->CampaignData.LastSavedTime)
+		{
+			IdleTimeSpan = CurrentGameData->CampaignData.EndTime - CurrentGameData->CampaignData.LastSavedTime;
+		}
+		else
+			IdleTimeSpan = FTimespan(0, 0, 0);
 		CurrentGameData->CampaignData.Finished = true;
 	}
 	return IdleTimeSpan;
+}
+
+FTimespan AGamePlayManager::GetDoubleIdleTimeSpanBetweenNowAndLastProcessTime()
+{
+	FTimespan result = FTimespan(0,0,0);
+	for (int i = 0; i < CurrentGameData->CampaignData.ActivatedSkillRecord.Num(); i++)
+	{
+		if (CurrentGameData->CampaignData.ActivatedSkillRecord[i].SkillType == EActiveSkillType::DoubleIdle)
+		{
+			FTimespan IdleTimeSpan = GetTimeSpanBetweenNowAndLastProcessTime();
+			FTimespan timeSpanToEnd = CurrentGameData->CampaignData.ActivatedSkillRecord[i].EndTime - FDateTime::Now();
+			if (timeSpanToEnd < IdleTimeSpan)
+			{
+				result = timeSpanToEnd;
+			}
+			else
+				result = IdleTimeSpan;
+			break;
+		}
+	}
+	return result;
 }
 
 void AGamePlayManager::FireShowResumeDialogueEvent(float IdleGains)
@@ -394,8 +501,7 @@ void AGamePlayManager::ProcessDoubleIdle()
 			FTimespan timeSpanToEnd = CurrentGameData->CampaignData.ActivatedSkillRecord[i].EndTime - FDateTime::Now();
 			if (timeSpanToEnd < IdleTimeSpan)
 			{
-				IdleGains = timeSpanToEnd.GetTotalSeconds() * CurrentGameData->CampaignData.VotesPerSecond;
-				IdleGains = UNJPUtilityFunctionLibrary::ConvertTo2Decimals(IdleGains);
+				IdleGains = timeSpanToEnd.GetTotalSeconds() * CurrentGameData->CampaignData.VotesPerSecond; 
 			}
 			AddVotes(IdleGains);
 			break;
@@ -414,4 +520,6 @@ void  AGamePlayManager::InitHexMap()
 }
 void  AGamePlayManager::UpdateHexMap()
 {}
+
+
 

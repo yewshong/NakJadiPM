@@ -74,6 +74,8 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Processing")
 		void AddVotesToSeats(float VoteCount);
 	UFUNCTION(BlueprintCallable, Category = "Processing")
+		void AddVotesToSeatsBySec(bool opponentAlso);
+	UFUNCTION(BlueprintCallable, Category = "Processing")
 		int GetVotersCountByIndex(int Index);
 	UFUNCTION(BlueprintCallable, Category = "Processing")
 		void ProcessTimeRemaining();
@@ -86,7 +88,13 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Processing")
 		float  GetGainsBetweenNowAndLastProcessTime();
 	UFUNCTION(BlueprintCallable, Category = "Processing")
+		float GetVPSGainsBetweenNowAndLastProcessTime(float &VPS);
+	UFUNCTION(BlueprintCallable, Category = "Processing")
+		void ProcessByTimeSpan(FTimespan GainTimeSpan, FTimespan doubleIdleTimeSpan);
+	UFUNCTION(BlueprintCallable, Category = "Processing")
 		FTimespan GetTimeSpanBetweenNowAndLastProcessTime();
+	UFUNCTION(BlueprintCallable, Category = "Processing")
+		FTimespan GetDoubleIdleTimeSpanBetweenNowAndLastProcessTime();
 	
 	UFUNCTION(BlueprintCallable, Category = "Processing")
 		void SaveCurrentGame();
@@ -121,6 +129,15 @@ public:
 	UPROPERTY(BlueprintAssignable, Category = "Event")
 		FShowResumeDialogue OnShowResumeDialogue;
 
+
+	UPROPERTY(EditAnywhere, Category = "GameProperties")
+		float OpponentBaseVPS = 0.1f;
+	UPROPERTY(EditAnywhere, Category = "GameProperties")
+		float OpponentVPSAddictive = 10.0f;
+	UPROPERTY(EditAnywhere, Category = "GameProperties")
+		float WinPercentageThreshold = 50.0f;
+	UPROPERTY(EditAnywhere, Category = "GameProperties")
+		double TotalSecondsInOneDay = 86400.0f;
 
 	UFUNCTION(BlueprintCallable, Category = "HexMap")
 		void InitHexMap();

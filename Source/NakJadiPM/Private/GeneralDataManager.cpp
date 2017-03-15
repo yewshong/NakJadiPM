@@ -37,11 +37,11 @@ void AGeneralDataManager:: ConstructAllDataFromDataTable()
 {
 	ConstructElectionDataFromDataTable();
 	ConstructCandidateDataFromDataTable();
+	ConstrucPoliticPartyDataFromDataTable();
 	ConstructStatesDataFromDataTable();
 	ConstructSkillsDataFromDataTable();
 	ConstructActivateSkillsDataFromDataTable();
 }
-
 
 void AGeneralDataManager::ConstructElectionDataFromDataTable()
 {	 
@@ -93,6 +93,32 @@ void AGeneralDataManager::ConstructCandidateDataFromDataTable()
 	}
 	else
 		UE_LOG(LogTemp, Warning, TEXT("Candidate variable is not set =.='"));
+}
+
+void AGeneralDataManager::ConstrucPoliticPartyDataFromDataTable()
+{
+	PoliticPartiesData = FAllPoliticPartyData();
+	PoliticPartiesData.Version = DataVersion;
+	if (PoliticPartiesDataTable)
+	{
+		int RowIndex = 1;
+		bool TimetoBreak = false;
+		while (!TimetoBreak)
+		{
+			FName FindRowName = FName(*FString::FromInt(RowIndex));
+			FPoliticParty* Row = PoliticPartiesDataTable->FindRow<FPoliticParty>(FindRowName, FString(""));
+			if (Row)
+			{
+				PoliticPartiesData.Parties.Add(*Row);
+				RowIndex++;
+			}
+			else
+				TimetoBreak = true;
+		}
+
+	}
+	else
+		UE_LOG(LogTemp, Warning, TEXT("Politic Parties variable is not set =.='"));
 }
 
 void AGeneralDataManager::ConstructStatesDataFromDataTable()
@@ -170,7 +196,6 @@ void AGeneralDataManager::ConstructActivateSkillsDataFromDataTable()
 		UE_LOG(LogTemp, Warning, TEXT("Active Skill data return false =.='"));
 }
 
-
 bool AGeneralDataManager::GameSaveDataExists()
 {
 	if (SaveGameManager)
@@ -185,13 +210,13 @@ bool  AGeneralDataManager::GameSaveDataExpired()
 	return false;
 }
 
-bool AGeneralDataManager::CreateNewAndSaveGame(FCandidate SelectedCandidate)
+bool AGeneralDataManager::CreateNewAndSaveGame(FCandidate SelectedCandidate, FPoliticParty SelectedParty)
 {
 	FCurrentCampaignData CampaignData = FCurrentCampaignData();
 	//add populate data from struct
 	
 	CampaignData.SelectedCandidate = SelectedCandidate;
-	
+	CampaignData.SelectedParty = SelectedParty;
 	CampaignData.ParlimentSeatsData = ParlimentSeatsData;
 	CampaignData.StatesData = StatesData;
 	CampaignData.SkillsCostData = SkillsCostData;
@@ -232,6 +257,20 @@ bool AGeneralDataManager::UpdateSaveGame(UCampaignSaveGame* ToBeSavedGame)
 }
 
 
-
-
-
+int  AGeneralDataManager::GetRandomOpponentIndex(FString SelectedCandidateName)
+{
+	/*if (CandidatesData.AllCandidates.Num() > 0)
+	{
+		int Counter = 100;
+		while (true)
+		{
+			int Random = FMath::RandRange(0, CandidatesData.AllCandidates.Num() - 1);
+			if (CandidatesData.AllCandidates[Random].Name != SelectedCandidateName)
+				return Random;
+			Counter++;
+			if (Counter > 100)
+				break;
+		}
+	}*/
+	return 0;
+}

@@ -6,6 +6,23 @@
 #include "CandidateDataManager.generated.h"
 
 USTRUCT(BlueprintType)
+struct FSkillCostInfoTwo
+{
+	GENERATED_USTRUCT_BODY()
+
+		UPROPERTY(EditAnywhere, BlueprintReadWrite)
+		int SkillStage;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+		float Damage;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+		float StartingCost;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+		float AddPerCentAfterUpgrade;
+};
+
+USTRUCT(BlueprintType)
 struct FSkillCostInfo : public FTableRowBase
 {
 	GENERATED_USTRUCT_BODY()
@@ -106,6 +123,36 @@ struct FAllActiveSkillsData : public FTableRowBase
 	}
 };
 
+UENUM(BlueprintType)
+enum class ESkillEffectType : uint8
+{
+	GainVote,
+	Gold,
+	EffectOpponentGold,
+	EffectOpponentVote,
+};
+
+USTRUCT(BlueprintType)
+struct FSpecialSkill : public FTableRowBase
+{
+	GENERATED_USTRUCT_BODY()
+		
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FString Name;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+		ESkillEffectType Type;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+		int number;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+		int coolDownInMinutes;
+};
+
+USTRUCT(BlueprintType)
+struct FRandomSkillEvent : public FSpecialSkill
+{
+	GENERATED_USTRUCT_BODY()
+};
+
 USTRUCT(BlueprintType)
 struct FActivatedSkill : public FTableRowBase
 {
@@ -130,13 +177,19 @@ struct FCandidate : public FTableRowBase
 	TArray<FString> Skills;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+		TArray<FString> SpecialSkills;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FString potraitPath;
 
 	FCandidate()
 	{
 		Skills = TArray<FString>();
+		SpecialSkills = TArray<FString>();
 	}
 };
+
+
 
 USTRUCT(BlueprintType)
 struct FAllCandidatesData : public FTableRowBase
@@ -187,6 +240,8 @@ struct FCurrentCampaignData
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FCandidate SelectedCandidate;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FPoliticParty SelectedParty;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FTimespan TimeRemaining;
@@ -249,6 +304,7 @@ struct FCurrentCampaignData
 	}
 };
 
+ 
 
 UCLASS()
 class NAKJADIPM_API ACandidateDataManager : public AActor

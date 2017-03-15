@@ -5,7 +5,33 @@
 #include "GameFramework/Actor.h"
 #include "ElectionDataManager.generated.h"
 
+USTRUCT(BlueprintType)
+struct FPoliticParty : public FTableRowBase
+{
+	GENERATED_USTRUCT_BODY()
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+		FString Name;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+		FString TexturePath;
+};
+
+USTRUCT(BlueprintType)
+struct FAllPoliticPartyData : public FTableRowBase
+{
+	GENERATED_USTRUCT_BODY()
+
+		UPROPERTY(EditAnywhere, BlueprintReadWrite)
+		FString Version;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+		TArray<FPoliticParty> Parties;
+
+	FAllPoliticPartyData()
+	{
+		Parties = TArray<FPoliticParty>();
+	}
+};
 
 USTRUCT(BlueprintType)
 struct FState : public FTableRowBase
@@ -34,7 +60,6 @@ struct FAllStatesData : public FTableRowBase
 		States = TArray<FState>();
 	}
 };
-
 
 USTRUCT(BlueprintType)
 struct FParlimentSeat : public FTableRowBase
@@ -68,7 +93,6 @@ struct FAllParlimentSeatsData : public FTableRowBase
 	}
 };
 
-
 USTRUCT(BlueprintType)
 struct FParlimentSeatResult 
 {
@@ -76,6 +100,15 @@ struct FParlimentSeatResult
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	int Index;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	int OpponentIndex;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float OpponentPossesion;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float OpponentVPS;
 			
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float possesion;
