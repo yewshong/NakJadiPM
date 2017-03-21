@@ -270,6 +270,9 @@ struct FCurrentCampaignData
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
 		FAllActiveSkillsData ActiveSkillData;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
+		FAllCandidatesData CandidatesData;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TArray<FParlimentSeatResult> SeatPossessionRecord;
 
@@ -294,6 +297,7 @@ struct FCurrentCampaignData
 		ParlimentSeatsData = FAllParlimentSeatsData();
 		StatesData = FAllStatesData();
 		SkillsCostData = FAllSkillCostData();
+		CandidatesData = FAllCandidatesData();
 		SeatPossessionRecord = TArray<FParlimentSeatResult>();
 		SkillUpgradeRecord = TArray<FSkillUpgradeInfo>();
 	}

@@ -221,6 +221,7 @@ bool AGeneralDataManager::CreateNewAndSaveGame(FCandidate SelectedCandidate, FPo
 	CampaignData.StatesData = StatesData;
 	CampaignData.SkillsCostData = SkillsCostData;
 	CampaignData.ActiveSkillData = ActivateSkillsData;
+	CampaignData.CandidatesData = CandidatesData;
 
 	for (int i = 0; i < SkillsCostData.SkillCosts.Num(); i++)
 	{
@@ -257,20 +258,3 @@ bool AGeneralDataManager::UpdateSaveGame(UCampaignSaveGame* ToBeSavedGame)
 }
 
 
-int  AGeneralDataManager::GetRandomOpponentIndex(FString SelectedCandidateName)
-{
-	/*if (CandidatesData.AllCandidates.Num() > 0)
-	{
-		int Counter = 100;
-		while (true)
-		{
-			int Random = FMath::RandRange(0, CandidatesData.AllCandidates.Num() - 1);
-			if (CandidatesData.AllCandidates[Random].Name != SelectedCandidateName)
-				return Random;
-			Counter++;
-			if (Counter > 100)
-				break;
-		}
-	}*/
-	return 0;
-}

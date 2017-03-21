@@ -126,24 +126,25 @@ void AGamePlayManager::ProcessParlimentSeatsResult()
 			SeatResult.Index = 0;
 			SeatResult.possesion = 0;
 			//todo add candidate
-			SeatResult.OpponentIndex = DataManager->GetRandomOpponentIndex(CurrentGameData->CampaignData.SelectedCandidate.Name);
+			SeatResult.OpponentIndex = GetRandomOpponentIndex(CurrentGameData->CampaignData.SelectedCandidate.Name);
 			SeatResult.OpponentVPS = OpponentBaseVPS + (OpponentVPSAddictive*SeatResult.Index);
 			CurrentGameData->CampaignData.SeatPossessionRecord.Add(SeatResult);
 		}
 		else
 		{
-			FParlimentSeatResult CurrentSeatResult = CurrentGameData->CampaignData.SeatPossessionRecord.Last();
+			//FParlimentSeatResult CurrentSeatResult = CurrentGameData->CampaignData.SeatPossessionRecord.Last();
 
-			UE_LOG(LogTemp, Warning, TEXT("CurrentSeatPossesion: %f "), CurrentSeatResult.possesion);
+			//UE_LOG(LogTemp, Warning, TEXT("CurrentSeatPossesion: %f "), CurrentSeatResult.possesion);
 			//if (CurrentSeatResult.possesion >= GetVotersCountByIndex(CurrentGameData->CampaignData.SeatPossessionRecord.Num() - 1))
-			if ((float)(CurrentSeatResult.possesion)/GetVotersCountByIndex(CurrentGameData->CampaignData.SeatPossessionRecord.Num() - 1)*100 > WinPercentageThreshold)
+
+			if (GetCandidateProgress()*100 > WinPercentageThreshold)
 			{
 				if (CurrentGameData->CampaignData.SeatPossessionRecord.Num() < CurrentGameData->CampaignData.ParlimentSeatsData.ParlimentSeats.Num())
 				{
 					FParlimentSeatResult SeatResult = FParlimentSeatResult();
 					SeatResult.Index = CurrentGameData->CampaignData.SeatPossessionRecord.Num();
 					SeatResult.possesion = 0;
-					SeatResult.OpponentIndex = DataManager->GetRandomOpponentIndex(CurrentGameData->CampaignData.SelectedCandidate.Name);
+					SeatResult.OpponentIndex = GetRandomOpponentIndex(CurrentGameData->CampaignData.SelectedCandidate.Name);
 					SeatResult.OpponentVPS = OpponentBaseVPS + (OpponentVPSAddictive*SeatResult.Index);
 					CurrentGameData->CampaignData.SeatPossessionRecord.Add(SeatResult);
 				}
@@ -190,18 +191,18 @@ void AGamePlayManager::ProcessByTimeSpan(FTimespan GainTimeSpan, FTimespan doubl
 	FTimespan OpponentTimeSpan = GainTimeSpan;
 	CurrentGameData->CampaignData.Balance += playerTimeSpan.GetTotalSeconds()*
 		CurrentGameData->CampaignData.VotesPerSecond;
-	UE_LOG(LogTemp, Warning, TEXT("Total seconds to be process are %f"), playerTimeSpan.GetTotalSeconds());
-	UE_LOG(LogTemp, Warning, TEXT("Total GainTimeSpan seconds to be process are %f"), GainTimeSpan.GetTotalSeconds());
-	UE_LOG(LogTemp, Warning, TEXT("Total doubleIdle seconds to be process are %f"), doubleIdleTimeSpan.GetTotalSeconds());
 	
 	for (int i = 0; i < playerTimeSpan.GetTotalSeconds(); i++)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Process %d second"), i);
 		if (i > TotalSecondsInOneDay) return;
-		if(i < OpponentTimeSpan.GetTotalSeconds())
+		if (i < OpponentTimeSpan.GetTotalSeconds())
+		{
 			AddVotesToSeatsBySec(true);
-		else 
+		}
+		else
+		{
 			AddVotesToSeatsBySec(false);
+		}
 	}
 }
 
@@ -253,30 +254,32 @@ void AGamePlayManager::AddVotesToSeatsBySec(bool opponentAlso)
 	if (CurrentGameData->CampaignData.SeatPossessionRecord.Num() > 0)
 	{
 		FParlimentSeatResult * CurrentResult = &CurrentGameData->CampaignData.SeatPossessionRecord.Last();
+		
+		float availableVote = FMath::Max(GetVotersCountByIndex(CurrentResult->Index)- CurrentResult->possesion - CurrentResult->OpponentPossesion,0.0f);
+		float OutStandingVotesToBeDeducted = FMath::Max(CurrentGameData->CampaignData.VotesPerSecond - availableVote,0.0f);
 
 		CurrentResult->possesion += CurrentGameData->CampaignData.VotesPerSecond;
 		CurrentResult->possesion = FMath::Clamp(CurrentResult->possesion, 0.0f, (float)GetVotersCountByIndex(CurrentResult->Index));
 		
-		float bringOverToOpponent = FMath::Clamp(CurrentResult->possesion + 
-							CurrentResult->OpponentPossesion - 
-							GetVotersCountByIndex(CurrentResult->Index), 
-							0.0f, CurrentGameData->CampaignData.VotesPerSecond);
-		
-		CurrentResult->OpponentPossesion -= bringOverToOpponent;
+		CurrentResult->OpponentPossesion -= OutStandingVotesToBeDeducted;
+		CurrentResult->OpponentPossesion = FMath::Clamp(CurrentResult->OpponentPossesion, 0.0f, (float)GetVotersCountByIndex(CurrentResult->Index));
 
 		if (opponentAlso)
 		{
+			float availableVote2 = FMath::Max(GetVotersCountByIndex(CurrentResult->Index) - CurrentResult->possesion - CurrentResult->OpponentPossesion, 0.0f);
+			float OutStandingVotesToBeDeducted2 = FMath::Max(CurrentResult->OpponentVPS - availableVote2, 0.0f);
+
 			CurrentResult->OpponentPossesion += CurrentResult->OpponentVPS;
-
 			CurrentResult->OpponentPossesion = FMath::Clamp(CurrentResult->OpponentPossesion, 0.0f, (float)GetVotersCountByIndex(CurrentResult->Index));
-
-			float bringOverToCandidate = FMath::Clamp(CurrentResult->possesion +
-				CurrentResult->OpponentPossesion -
-				GetVotersCountByIndex(CurrentResult->Index),
-				0.0f, CurrentResult->OpponentVPS);
-
-			CurrentResult->possesion -= bringOverToCandidate;
+			
+			CurrentResult->possesion -= OutStandingVotesToBeDeducted2;
+			CurrentResult->possesion = FMath::Clamp(CurrentResult->possesion, 0.0f, (float)GetVotersCountByIndex(CurrentResult->Index));
 		}
+
+
+		//UE_LOG(LogTemp, Warning, TEXT("Player Possesion: %f"), CurrentResult->possesion);
+		//UE_LOG(LogTemp, Warning, TEXT("Opponent Possesion: %f"), CurrentResult->OpponentPossesion);
+		//UE_LOG(LogTemp, Warning, TEXT("Total Possession: %f"), CurrentResult->possesion+CurrentResult->OpponentPossesion);
 
 		ProcessParlimentSeatsResult();
 	}
@@ -509,17 +512,37 @@ void AGamePlayManager::ProcessDoubleIdle()
 	}
 }
 
-
-void  AGamePlayManager::InitHexMap()
+float AGamePlayManager::GetCandidateProgress()
 {
-	if (HexagonGrid && HexMapDataManager->MalaysiaHexMapDataTable)
+	if(CurrentGameData)
 	{
-		HexagonGrid->AllTilesInfo = HexMapDataManager->MalaysiaHexMapTilesData;
-		HexagonGrid->InitGrid(); 
+		return (float)(CurrentGameData->CampaignData.SeatPossessionRecord.Last().possesion) / GetVotersCountByIndex(CurrentGameData->CampaignData.SeatPossessionRecord.Num() - 1);
 	}
+	return 0;
 }
-void  AGamePlayManager::UpdateHexMap()
-{}
 
+float AGamePlayManager::GetOpponentProgress()
+{
+	if (CurrentGameData)
+	{
+		return (float)(CurrentGameData->CampaignData.SeatPossessionRecord.Last().OpponentPossesion) / GetVotersCountByIndex(CurrentGameData->CampaignData.SeatPossessionRecord.Num() - 1);
+	}
+	return 0;
+}
+int  AGamePlayManager::GetRandomOpponentIndex(FString SelectedCandidateName)
+{
+	if (CurrentGameData)
+	{
+		int Random = FMath::RandRange(0, CurrentGameData->CampaignData.CandidatesData.AllCandidates.Num() - 2);
+		UE_LOG(LogTemp, Warning, TEXT("Random Candidate Name: %s"), *CurrentGameData->CampaignData.CandidatesData.AllCandidates[Random].Name);
+		if (CurrentGameData->CampaignData.CandidatesData.AllCandidates[Random].Name != SelectedCandidateName)
+			return Random;
+		else if (Random != CurrentGameData->CampaignData.CandidatesData.AllCandidates.Num() - 2)
+			return Random + 1;
+		else if (Random > 0)
+			return Random - 1;
+	}
+	return -1;
+}
 
 

@@ -114,6 +114,14 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Processing")
 		void ProcessDoubleIdle();
 	
+
+	UFUNCTION(BlueprintCallable, Category = "RetrieveData")
+		float GetCandidateProgress() ;
+	UFUNCTION(BlueprintCallable, Category = "RetrieveData")
+		float GetOpponentProgress();
+	UFUNCTION(BlueprintCallable, Category = "RetrieveData")
+		int GetRandomOpponentIndex(FString SelectedCandidateName);
+
 	/*UFUNCTION(BlueprintCallable, Category = "Interaction")
 	bool playerUpgrade();
 	
@@ -133,14 +141,9 @@ public:
 	UPROPERTY(EditAnywhere, Category = "GameProperties")
 		float OpponentBaseVPS = 0.1f;
 	UPROPERTY(EditAnywhere, Category = "GameProperties")
-		float OpponentVPSAddictive = 10.0f;
+		float OpponentVPSAddictive = 7.5f;
 	UPROPERTY(EditAnywhere, Category = "GameProperties")
 		float WinPercentageThreshold = 50.0f;
 	UPROPERTY(EditAnywhere, Category = "GameProperties")
 		double TotalSecondsInOneDay = 86400.0f;
-
-	UFUNCTION(BlueprintCallable, Category = "HexMap")
-		void InitHexMap();
-	UFUNCTION(BlueprintCallable, Category = "HexMap")
-		void UpdateHexMap();
 };

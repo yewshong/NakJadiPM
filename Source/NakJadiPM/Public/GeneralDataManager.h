@@ -100,7 +100,5 @@ public:
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "SaveData")
 	ASaveGameManager* SaveGameManager = nullptr;
-
-	UFUNCTION(BlueprintCallable, Category = "SaveData")
-		int GetRandomOpponentIndex(FString SelectedCandidateName);
+	
 };
