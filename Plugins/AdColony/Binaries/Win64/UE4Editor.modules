@@ -1,9 +1,9 @@
 {
 	"Changelist" : 3249277,
 	"CompatibleChangelist" : 3195953,
-	"BuildId" : "97fa4d6b-2de4-40f7-836b-8116d916a378",
+	"BuildId" : "6ddb36e0-a355-4b28-8954-d844b8789ad0",
 	"Modules" : 
 	{
-		"AdColony" : "UE4Editor-AdColony-6650.dll"
+		"AdColony" : "UE4Editor-AdColony-5715.dll"
 	}
 }

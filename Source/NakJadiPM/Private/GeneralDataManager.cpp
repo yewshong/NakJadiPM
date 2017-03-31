@@ -248,7 +248,6 @@ bool AGeneralDataManager::DeleteSaveGame()
 		return false;
 }
 
-
 bool AGeneralDataManager::UpdateSaveGame(UCampaignSaveGame* ToBeSavedGame)
 {
 	if (SaveGameManager)
