@@ -113,9 +113,13 @@ struct FParlimentSeatResult
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float possesion;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FDateTime OpponentDisableExpireTime;
+
 	FParlimentSeatResult()
 	{
 		possesion = 0;
+		OpponentDisableExpireTime = FDateTime();
 	}
 };
 

@@ -18,6 +18,13 @@ class NAKJADIPM_API AGamePlayManager : public AActor
 		DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FShowResumeDialogue, float, idleGain);
 public:	
 
+
+	UFUNCTION(BlueprintCallable, Category = "Event")
+		void FireShowResumeDialogueEvent(float IdleGains);
+
+	UPROPERTY(BlueprintAssignable, Category = "Event")
+		FShowResumeDialogue OnShowResumeDialogue;
+
 	//DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnResumeProcessedFinished, AGamePlayManager*);
 	// Sets default values for this actor's properties
 	AGamePlayManager();
@@ -122,21 +129,18 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "RetrieveData")
 		int GetRandomOpponentIndex(FString SelectedCandidateName);
 
-	/*UFUNCTION(BlueprintCallable, Category = "Interaction")
-	bool playerUpgrade();
-	
-	UFUNCTION(BlueprintCallable, Category = "loop")
-	bool UpdateBalance();
-	
-	UFUNCTION(BlueprintCallable, Category = "loop")
-	bool UpdateElectionData();*/
+	UFUNCTION(BlueprintCallable, Category = "Balloon")
+	FBalloonSkill GetRandomBalloonSkill();
+	UFUNCTION(BlueprintCallable, Category = "Balloon")
+	void ActivateBalloonSkill(FBalloonSkill BalloonSkill);
 
-	UFUNCTION(BlueprintCallable, Category = "Event")
-		void FireShowResumeDialogueEvent(float IdleGains);
 
-	UPROPERTY(BlueprintAssignable, Category = "Event")
-		FShowResumeDialogue OnShowResumeDialogue;
-
+	UFUNCTION(BlueprintCallable, Category = "Medal")
+		bool AnyMedalLeft();
+	UFUNCTION(BlueprintCallable, Category = "Medal")
+		void AddMedal(int number);
+	UFUNCTION(BlueprintCallable, Category = "Medal")
+		void MinusMedal(int number);
 
 	UPROPERTY(EditAnywhere, Category = "GameProperties")
 		float OpponentBaseVPS = 0.1f;
@@ -146,4 +150,5 @@ public:
 		float WinPercentageThreshold = 50.0f;
 	UPROPERTY(EditAnywhere, Category = "GameProperties")
 		double TotalSecondsInOneDay = 86400.0f;
+
 };

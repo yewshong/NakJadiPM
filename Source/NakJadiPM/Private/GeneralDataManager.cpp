@@ -40,7 +40,8 @@ void AGeneralDataManager:: ConstructAllDataFromDataTable()
 	ConstrucPoliticPartyDataFromDataTable();
 	ConstructStatesDataFromDataTable();
 	ConstructSkillsDataFromDataTable();
-	ConstructActivateSkillsDataFromDataTable();
+	ConstructActivateSkillsDataFromDataTable(); 
+	ConstructBalloonSkillsDataFromDataTable();
 }
 
 void AGeneralDataManager::ConstructElectionDataFromDataTable()
@@ -196,6 +197,33 @@ void AGeneralDataManager::ConstructActivateSkillsDataFromDataTable()
 		UE_LOG(LogTemp, Warning, TEXT("Active Skill data return false =.='"));
 }
 
+void AGeneralDataManager::ConstructBalloonSkillsDataFromDataTable()
+{
+	BalloonSkillsData = FAllBalloonSkillsData();
+	BalloonSkillsData.Version = DataVersion;
+	if (BalloonSkillsDataTable)
+	{
+		int RowIndex = 1;
+		bool TimetoBreak = false;
+		while (!TimetoBreak)
+		{
+			FName FindRowName = FName(*FString::FromInt(RowIndex));
+			FBalloonSkill* Row = BalloonSkillsDataTable->FindRow<FBalloonSkill>(FindRowName, FString(""));
+			if (Row)
+			{
+				BalloonSkillsData.BalloonSkills.Add(*Row);
+				RowIndex++;
+			}
+			else
+			{
+				TimetoBreak = true;
+			}
+		}
+	}
+	else
+		UE_LOG(LogTemp, Warning, TEXT("Balloon Skill data return false =.='"));
+}
+
 bool AGeneralDataManager::GameSaveDataExists()
 {
 	if (SaveGameManager)
@@ -221,6 +249,7 @@ bool AGeneralDataManager::CreateNewAndSaveGame(FCandidate SelectedCandidate, FPo
 	CampaignData.StatesData = StatesData;
 	CampaignData.SkillsCostData = SkillsCostData;
 	CampaignData.ActiveSkillData = ActivateSkillsData;
+	CampaignData.BalloonSkillData = BalloonSkillsData;
 	CampaignData.CandidatesData = CandidatesData;
 
 	for (int i = 0; i < SkillsCostData.SkillCosts.Num(); i++)

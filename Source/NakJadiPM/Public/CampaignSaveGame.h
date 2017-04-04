@@ -21,6 +21,9 @@ public:
 		int UserIndex;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
+		int Medal;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
 	FString PlayerName;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")

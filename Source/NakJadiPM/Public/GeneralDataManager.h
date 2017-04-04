@@ -42,6 +42,9 @@ public:
 
 	UPROPERTY(EditAnywhere, Category = "DataTable")
 		UDataTable* ActivateSkillsDataTable;
+
+	UPROPERTY(EditAnywhere, Category = "DataTable")
+		UDataTable* BalloonSkillsDataTable;
 	
 	UFUNCTION(BlueprintCallable, Category = "DataTable")
 		void ConstructAllDataFromDataTable();
@@ -62,6 +65,9 @@ public:
 	
 	UFUNCTION(BlueprintCallable, Category = "DataTable")
 		void ConstructActivateSkillsDataFromDataTable();
+
+	UFUNCTION(BlueprintCallable, Category = "DataTable")
+		void ConstructBalloonSkillsDataFromDataTable();
 	
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
@@ -81,6 +87,9 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
 		FAllActiveSkillsData ActivateSkillsData;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
+		FAllBalloonSkillsData BalloonSkillsData;
 	
 	UFUNCTION(BlueprintCallable, Category = "SaveData")
 	bool GameSaveDataExists();

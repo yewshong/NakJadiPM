@@ -34,4 +34,10 @@ public:
 	
 	UFUNCTION(BlueprintCallable, Category = "NJPUtility")
 		static FString GetAchievementEnumAsString(EAchievementEnum EnumValue);
+	
+	UFUNCTION(BlueprintCallable, Category = "NJPUtility")
+		static FText FormatBalloonDescription(FBalloonSkill BalloonSkill, FCurrentCampaignData CampaignData);
+	
+	UFUNCTION(BlueprintCallable, Category = "NJPUtility")
+		static int CalculateBalloonEffect(FBalloonSkill BalloonSkill, FCurrentCampaignData CampaignData);
 };

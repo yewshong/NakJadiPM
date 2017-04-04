@@ -1,9 +1,9 @@
 {
 	"Changelist" : 3249277,
 	"CompatibleChangelist" : 3195953,
-	"BuildId" : "6ddb36e0-a355-4b28-8954-d844b8789ad0",
+	"BuildId" : "a6c860fd-1f85-4d12-8965-760ed020d462",
 	"Modules" : 
 	{
-		"UnityAds" : "UE4Editor-UnityAds-5801.dll"
+		"UnityAds" : "UE4Editor-UnityAds-2168.dll"
 	}
 }

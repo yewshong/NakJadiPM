@@ -63,3 +63,29 @@ FString UNJPUtilityFunctionLibrary::GetAchievementEnumAsString(EAchievementEnum 
 
 	return EnumPtr->GetEnumName((int32)EnumValue); 
 }
+
+
+FText UNJPUtilityFunctionLibrary::FormatBalloonDescription(FBalloonSkill BalloonSkill, FCurrentCampaignData CampaignData)
+{
+	return FText::Format(BalloonSkill.Description, CalculateBalloonEffect(BalloonSkill,CampaignData));
+}
+
+int UNJPUtilityFunctionLibrary::CalculateBalloonEffect(FBalloonSkill BalloonSkill, FCurrentCampaignData CampaignData)
+{
+	switch (BalloonSkill.Factor)
+	{
+	case EBalloonEffectFactorType::DivideByNumber: 
+		return BalloonSkill.Number;
+		break;
+	case EBalloonEffectFactorType::MultiplyByNumber:
+		return BalloonSkill.Number;
+		break;
+	case EBalloonEffectFactorType::MultiplyCPS:
+		return BalloonSkill.Number * CampaignData.ClickDamage;
+		break;
+	case EBalloonEffectFactorType::MultiplyVPS: 
+		return BalloonSkill.Number * CampaignData.VotesPerSecond;
+		break;
+	}
+	return 0;
+}

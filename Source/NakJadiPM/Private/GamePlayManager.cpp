@@ -1,7 +1,9 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "NakJadiPM.h"
+#include "NJPUtilityFunctionLibrary.h"
 #include "GamePlayManager.h"
+
 
 
 // Sets default values
@@ -266,14 +268,17 @@ void AGamePlayManager::AddVotesToSeatsBySec(bool opponentAlso)
 
 		if (opponentAlso)
 		{
-			float availableVote2 = FMath::Max(GetVotersCountByIndex(CurrentResult->Index) - CurrentResult->possesion - CurrentResult->OpponentPossesion, 0.0f);
-			float OutStandingVotesToBeDeducted2 = FMath::Max(CurrentResult->OpponentVPS - availableVote2, 0.0f);
+			if (FDateTime::Now() > CurrentResult->OpponentDisableExpireTime)
+			{
+				float availableVote2 = FMath::Max(GetVotersCountByIndex(CurrentResult->Index) - CurrentResult->possesion - CurrentResult->OpponentPossesion, 0.0f);
+				float OutStandingVotesToBeDeducted2 = FMath::Max(CurrentResult->OpponentVPS - availableVote2, 0.0f);
 
-			CurrentResult->OpponentPossesion += CurrentResult->OpponentVPS;
-			CurrentResult->OpponentPossesion = FMath::Clamp(CurrentResult->OpponentPossesion, 0.0f, (float)GetVotersCountByIndex(CurrentResult->Index));
-			
-			CurrentResult->possesion -= OutStandingVotesToBeDeducted2;
-			CurrentResult->possesion = FMath::Clamp(CurrentResult->possesion, 0.0f, (float)GetVotersCountByIndex(CurrentResult->Index));
+				CurrentResult->OpponentPossesion += CurrentResult->OpponentVPS;
+				CurrentResult->OpponentPossesion = FMath::Clamp(CurrentResult->OpponentPossesion, 0.0f, (float)GetVotersCountByIndex(CurrentResult->Index));
+
+				CurrentResult->possesion -= OutStandingVotesToBeDeducted2;
+				CurrentResult->possesion = FMath::Clamp(CurrentResult->possesion, 0.0f, (float)GetVotersCountByIndex(CurrentResult->Index));
+			}
 		}
 
 
@@ -545,4 +550,88 @@ int  AGamePlayManager::GetRandomOpponentIndex(FString SelectedCandidateName)
 	return -1;
 }
 
+
+FBalloonSkill AGamePlayManager::GetRandomBalloonSkill()
+{
+	if (DataManager)
+	{
+		if (CurrentGameData->CampaignData.BalloonSkillData.BalloonSkills.Num()>0)
+		{
+			int randomIndex = FMath::RandRange(0, CurrentGameData->CampaignData.BalloonSkillData.BalloonSkills.Num() - 1);
+			return CurrentGameData->CampaignData.BalloonSkillData.BalloonSkills[randomIndex];			
+		}
+	}
+	FBalloonSkill RandomBalloonSkill = FBalloonSkill();
+	return RandomBalloonSkill;
+}
+
+void AGamePlayManager::ActivateBalloonSkill(FBalloonSkill BalloonSkill)
+{
+	//BalloonSkill.
+		/*UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FString Name;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FString Description;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+		EBalloonEffectType Type;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+		bool EvilSkill;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+		int Number;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+		bool MultiplyVPS;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+		bool MultiplyCPS;
+		*/
+	int effectNumber = UNJPUtilityFunctionLibrary::CalculateBalloonEffect(BalloonSkill, CurrentGameData->CampaignData);
+	effectNumber = FMath::Max(1, effectNumber);
+	switch (BalloonSkill.Type)
+	{
+	case EBalloonEffectType::AddGold: 
+		CurrentGameData->CampaignData.Balance += effectNumber;
+		break;
+	case EBalloonEffectType::AddVote: 
+		AddVotesToSeats(effectNumber);
+		break;
+	case EBalloonEffectType::DisableOpponent: 
+		CurrentGameData->CampaignData.SeatPossessionRecord.Last().OpponentDisableExpireTime = FDateTime::Now() + FTimespan(0, effectNumber, 0);
+		break;
+	case EBalloonEffectType::DivideOpponentVPS: 
+		CurrentGameData->CampaignData.SeatPossessionRecord.Last().OpponentVPS /= effectNumber;
+		break;
+	case EBalloonEffectType::MinusOpponentVoteCount: 
+		CurrentGameData->CampaignData.SeatPossessionRecord.Last().OpponentPossesion -= effectNumber;
+		CurrentGameData->CampaignData.SeatPossessionRecord.Last().OpponentPossesion = 
+			FMath::Max(0.0f, CurrentGameData->CampaignData.SeatPossessionRecord.Last().OpponentPossesion);
+		break;
+	}
+}
+
+
+bool AGamePlayManager::AnyMedalLeft()
+{
+	if (CurrentGameData && DataManager)
+	{
+		if (CurrentGameData->Medal > 0)
+			return true;
+
+	}
+	return false;
+}
+
+void  AGamePlayManager::AddMedal(int number)
+{
+	if (CurrentGameData && DataManager)
+	{
+		CurrentGameData->Medal += number;
+	}
+}
+
+void AGamePlayManager::MinusMedal(int number)
+{
+	if (CurrentGameData && DataManager)
+	{
+		CurrentGameData->Medal -= number;
+	}
+}
 

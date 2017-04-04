@@ -84,7 +84,8 @@ UENUM(BlueprintType)
 enum class EAdsRequestType : uint8
 {
 	Skill,
-	Coin,
+	Medal,
+	Ballon,
 };
 
 UENUM(BlueprintType)
@@ -124,33 +125,56 @@ struct FAllActiveSkillsData : public FTableRowBase
 };
 
 UENUM(BlueprintType)
-enum class ESkillEffectType : uint8
+enum class EBalloonEffectFactorType : uint8
 {
-	GainVote,
-	Gold,
-	EffectOpponentGold,
-	EffectOpponentVote,
+	MultiplyCPS,
+	MultiplyVPS,
+	MultiplyByNumber,
+	DivideByNumber,
+};
+
+UENUM(BlueprintType)
+enum class EBalloonEffectType : uint8
+{
+	AddVote,
+	AddGold,
+	DivideOpponentVPS,
+	MinusOpponentVoteCount,
+	DisableOpponent,
 };
 
 USTRUCT(BlueprintType)
-struct FSpecialSkill : public FTableRowBase
+struct FBalloonSkill : public FTableRowBase
 {
 	GENERATED_USTRUCT_BODY()
 		
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FString Name;
+	FText Name;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-		ESkillEffectType Type;
+	FText Description;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-		int number;
+	EBalloonEffectType Type;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-		int coolDownInMinutes;
+		EBalloonEffectFactorType Factor;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	int Number;
 };
 
 USTRUCT(BlueprintType)
-struct FRandomSkillEvent : public FSpecialSkill
+struct FAllBalloonSkillsData : public FTableRowBase
 {
 	GENERATED_USTRUCT_BODY()
+
+		UPROPERTY(EditAnywhere, BlueprintReadWrite)
+		FString Version;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+		TArray<FBalloonSkill> BalloonSkills;
+
+	FAllBalloonSkillsData()
+	{
+		BalloonSkills = TArray<FBalloonSkill>();
+	}
 };
 
 USTRUCT(BlueprintType)
@@ -188,8 +212,6 @@ struct FCandidate : public FTableRowBase
 		SpecialSkills = TArray<FString>();
 	}
 };
-
-
 
 USTRUCT(BlueprintType)
 struct FAllCandidatesData : public FTableRowBase
@@ -269,6 +291,8 @@ struct FCurrentCampaignData
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
 		FAllActiveSkillsData ActiveSkillData;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
+		FAllBalloonSkillsData BalloonSkillData;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
 		FAllCandidatesData CandidatesData;
