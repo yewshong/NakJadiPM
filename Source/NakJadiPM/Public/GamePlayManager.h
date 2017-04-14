@@ -1,7 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
-
+#include "ProductsSaveGame.h"
 #include "NJPUtilityFunctionLibrary.h"
 #include "SaveGameManager.h"
 #include "GeneralDataManager.h"
@@ -42,6 +42,8 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
 		UCampaignSaveGame* CurrentGameData = nullptr;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
+		UProductsSaveGame* CurrentProductsData = nullptr;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
 		AHexMapDataManager* HexMapDataManager = nullptr;
@@ -105,6 +107,8 @@ public:
 	
 	UFUNCTION(BlueprintCallable, Category = "Processing")
 		void SaveCurrentGame();
+	UFUNCTION(BlueprintCallable, Category = "Processing")
+		void SaveCurrentProducts();
 
 	UFUNCTION(BlueprintCallable, Category = "Processing")
 		void ProcessFinishedReport();
@@ -128,6 +132,8 @@ public:
 		float GetOpponentProgress();
 	UFUNCTION(BlueprintCallable, Category = "RetrieveData")
 		int GetRandomOpponentIndex(FString SelectedCandidateName);
+	UFUNCTION(BlueprintCallable, Category = "RetrieveData")
+		int GetRandomPartiIndex(FString SelectedCandidateParti);
 
 	UFUNCTION(BlueprintCallable, Category = "Balloon")
 	FBalloonSkill GetRandomBalloonSkill();
@@ -141,6 +147,14 @@ public:
 		void AddMedal(int number);
 	UFUNCTION(BlueprintCallable, Category = "Medal")
 		void MinusMedal(int number);
+	UFUNCTION(BlueprintCallable, Category = "Product")
+		void ProductsInfoReceived(FString productID, FString DisplayPrice);
+	UFUNCTION(BlueprintCallable, Category = "Product")
+		void ClaimedProduct(FString ProductID, FString TransactionID);
+	UFUNCTION(BlueprintCallable, Category = "Product")
+		void ActivateNoAds();
+	UFUNCTION(BlueprintCallable, Category = "Product")
+		void RecordConsumed(FString ProductID, FString TransactionID);
 
 	UPROPERTY(EditAnywhere, Category = "GameProperties")
 		float OpponentBaseVPS = 0.1f;

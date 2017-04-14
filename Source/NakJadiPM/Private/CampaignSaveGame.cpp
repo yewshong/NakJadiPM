@@ -9,7 +9,6 @@ UCampaignSaveGame::UCampaignSaveGame()
 {
 	SaveSlotName = TEXT("CampaignData");
 	UserIndex = 0;
-	Medal = 1;
 }
 
 

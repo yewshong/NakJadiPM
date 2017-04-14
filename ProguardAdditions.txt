@@ -1,0 +1,22 @@
+-dontskipnonpubliclibraryclassmembers
+-dontwarn android.app.Activity
+-keep class android.webkit.** { *; } 
+-keepclassmembers class android.webkit.** { *; } 
+-dontwarn android.webkit.**
+-keep class android.net.** { *; } 
+-dontwarn android.net.**
+-keep class android.**.** { *; } 
+-dontwarn android.**.**
+-keep class android.content.** { *; } 
+-keepclassmembers class android.content.** { *; } 
+-keep class com.google.android.gms.** { *; } 
+
+
+-keep class com.adcolony.sdk.** { *; } 
+-dontwarn com.adcolony.sdk.**
+
+-keep class libcore.icu.** { *; } 
+-dontwarn libcore.icu.**
+
+-keep class sun.misc.** { *; } 
+-dontwarn sun.misc.**

@@ -47,6 +47,9 @@ void AGamePlayManager::Initialize()
 			FTimerHandle AutoSaveTimerHandle = FTimerHandle();
 			GetWorldTimerManager().SetTimer(AutoSaveTimerHandle, this, &AGamePlayManager::SaveCurrentGame, UpdateTimeSpan.GetSeconds(), true);
 		}
+
+		if (DataManager && DataManager->SaveGameManager)
+			CurrentProductsData = DataManager->SaveGameManager->GetProductSaveGame();
 	}
 }
 
@@ -130,6 +133,8 @@ void AGamePlayManager::ProcessParlimentSeatsResult()
 			//todo add candidate
 			SeatResult.OpponentIndex = GetRandomOpponentIndex(CurrentGameData->CampaignData.SelectedCandidate.Name);
 			SeatResult.OpponentVPS = OpponentBaseVPS + (OpponentVPSAddictive*SeatResult.Index);
+			SeatResult.OpponentPossesion = 0;
+			SeatResult.PartiIndex = GetRandomPartiIndex(CurrentGameData->CampaignData.SelectedParty.Name);
 			CurrentGameData->CampaignData.SeatPossessionRecord.Add(SeatResult);
 		}
 		else
@@ -148,6 +153,8 @@ void AGamePlayManager::ProcessParlimentSeatsResult()
 					SeatResult.possesion = 0;
 					SeatResult.OpponentIndex = GetRandomOpponentIndex(CurrentGameData->CampaignData.SelectedCandidate.Name);
 					SeatResult.OpponentVPS = OpponentBaseVPS + (OpponentVPSAddictive*SeatResult.Index);
+					SeatResult.OpponentPossesion = 0;
+					SeatResult.PartiIndex = GetRandomPartiIndex(CurrentGameData->CampaignData.SelectedParty.Name);
 					CurrentGameData->CampaignData.SeatPossessionRecord.Add(SeatResult);
 				}
 				else
@@ -173,12 +180,6 @@ void AGamePlayManager::ProcessVotesPerSecond()
 
 	}
 	return;
-	if (CurrentGameData)
-	{
-		float IdleGains = GetGainsBetweenNowAndLastProcessTime();
-		AddVotes(IdleGains);
-		ProcessDoubleIdle();
-	}
 }
 
 void AGamePlayManager::AddVotes(float& gains)
@@ -550,6 +551,22 @@ int  AGamePlayManager::GetRandomOpponentIndex(FString SelectedCandidateName)
 	return -1;
 }
 
+int  AGamePlayManager::GetRandomPartiIndex(FString SelectedCandidateParti)
+{
+	if (CurrentGameData)
+	{
+		int Random = FMath::RandRange(0, CurrentGameData->CampaignData.PoliticPartiesData.Parties.Num() - 2);
+		UE_LOG(LogTemp, Warning, TEXT("Random Candidate Name: %s"), *CurrentGameData->CampaignData.PoliticPartiesData.Parties[Random].Name);
+		if (CurrentGameData->CampaignData.PoliticPartiesData.Parties[Random].Name != SelectedCandidateParti)
+			return Random;
+		else if (Random != CurrentGameData->CampaignData.PoliticPartiesData.Parties.Num() - 2)
+			return Random + 1;
+		else if (Random > 0)
+			return Random - 1;
+	}
+	return -1;
+}
+
 
 FBalloonSkill AGamePlayManager::GetRandomBalloonSkill()
 {
@@ -567,22 +584,6 @@ FBalloonSkill AGamePlayManager::GetRandomBalloonSkill()
 
 void AGamePlayManager::ActivateBalloonSkill(FBalloonSkill BalloonSkill)
 {
-	//BalloonSkill.
-		/*UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FString Name;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FString Description;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-		EBalloonEffectType Type;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-		bool EvilSkill;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-		int Number;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-		bool MultiplyVPS;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-		bool MultiplyCPS;
-		*/
 	int effectNumber = UNJPUtilityFunctionLibrary::CalculateBalloonEffect(BalloonSkill, CurrentGameData->CampaignData);
 	effectNumber = FMath::Max(1, effectNumber);
 	switch (BalloonSkill.Type)
@@ -610,9 +611,9 @@ void AGamePlayManager::ActivateBalloonSkill(FBalloonSkill BalloonSkill)
 
 bool AGamePlayManager::AnyMedalLeft()
 {
-	if (CurrentGameData && DataManager)
+	if (CurrentProductsData && DataManager)
 	{
-		if (CurrentGameData->Medal > 0)
+		if (CurrentProductsData->Medal > 0)
 			return true;
 
 	}
@@ -621,17 +622,85 @@ bool AGamePlayManager::AnyMedalLeft()
 
 void  AGamePlayManager::AddMedal(int number)
 {
-	if (CurrentGameData && DataManager)
+	if (CurrentProductsData && DataManager)
 	{
-		CurrentGameData->Medal += number;
+		CurrentProductsData->Medal += number;
 	}
 }
 
 void AGamePlayManager::MinusMedal(int number)
 {
-	if (CurrentGameData && DataManager)
+	if (CurrentProductsData && DataManager)
 	{
-		CurrentGameData->Medal -= number;
+		CurrentProductsData->Medal -= number;
 	}
 }
 
+void AGamePlayManager::SaveCurrentProducts()
+{
+	if (CurrentProductsData && DataManager)
+	{
+		DataManager->UpdateProductSave(CurrentProductsData);
+	}
+}
+
+
+void AGamePlayManager::ProductsInfoReceived(FString productID, FString DisplayPrice)
+{
+	GEngine->AddOnScreenDebugMessage(-1, 300.0f, FColor::Yellow, FString::Printf(TEXT("Trying to update product %s, price : %s"), *productID, *DisplayPrice));
+	if (CurrentProductsData && DataManager)
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 300.0f, FColor::Yellow, FString::Printf(TEXT("Updating product %s, price : %s"), *productID, *DisplayPrice));
+		for (int i = 0; i < CurrentProductsData->AllProductsData.Products.Num(); i++)
+		{
+			if (CurrentProductsData->AllProductsData.Products[i].ProductID == productID)
+			{
+				CurrentProductsData->AllProductsData.Products[i].DisplayPrice = FText::FromString(DisplayPrice);
+				GEngine->AddOnScreenDebugMessage(-1, 300.0f, FColor::Yellow, FString::Printf(TEXT("Updated product %s, price : %s"), *productID, *DisplayPrice));
+				break;
+			}
+		}
+		DataManager->UpdateProductSave(CurrentProductsData);
+	}
+}
+
+void AGamePlayManager::ClaimedProduct(FString ProductID, FString TransactionID)
+{
+	if (CurrentProductsData && DataManager)
+	{
+		for (int i = 0; i < CurrentProductsData->AllProductsData.Products.Num(); i++)
+		{
+			if (CurrentProductsData->AllProductsData.Products[i].ProductID == ProductID)
+			{
+				switch (CurrentProductsData->AllProductsData.Products[i].Reward)
+				{
+					case EProductReward::NoAds:ActivateNoAds(); RecordConsumed(ProductID, TransactionID); break;
+					case EProductReward::AddTenStars:AddMedal(10); RecordConsumed(ProductID, TransactionID); break;
+				}
+			}
+		}
+	}
+	DataManager->UpdateProductSave(CurrentProductsData);
+}
+
+
+void AGamePlayManager::ActivateNoAds()
+{
+	if (CurrentProductsData && DataManager)
+	{
+		CurrentProductsData->NoAds = true;
+		CurrentProductsData->NoAdsActivated = true;
+	}
+}
+
+void AGamePlayManager::RecordConsumed(FString ProductID, FString TransactionID)
+{
+	if (CurrentProductsData && DataManager)
+	{
+		FConsumedRecord newRecord = FConsumedRecord();
+		newRecord.ProductID = ProductID;
+		newRecord.TransactionID = TransactionID;
+		newRecord.UsedDate = FDateTime::Now();
+		CurrentProductsData->ConsumedRecords.Add(newRecord);
+	}
+}

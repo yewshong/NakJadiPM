@@ -1,6 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
+#include "ProductsSaveGame.h"
 #include "CampaignSaveGame.h"
 #include "GameFramework/Actor.h"
 #include "Kismet/GameplayStatics.h"
@@ -36,9 +37,19 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "Save")
 	bool SaveExists();
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Save")
+		UProductsSaveGame* CurrentProductSaveGame;
+	UFUNCTION(BlueprintCallable, Category = "Save")
+		UProductsSaveGame* GetProductSaveGame();
+	UFUNCTION(BlueprintCallable, Category = "Save")
+		bool ProductsSaveExists();
+	
+	UFUNCTION(BlueprintCallable, Category = "Save")
+		bool CreateNewProductSaveGameAndSave(FAllProductsData ProductsData);
 
-	//UFUNCTION(BlueprintCallable, Category = "Save")
-	//bool CampaignFinished();
-	//UFUNCTION(BlueprintCallable, Category = "Save")
-	//bool UpdateAndSaveCampaignData();
+	UFUNCTION(BlueprintCallable, Category = "Save")
+		bool UpdateProductSaveGame(UProductsSaveGame* ToBeSavedGame);
+	UFUNCTION(BlueprintCallable, Category = "Save")
+		void UpdateProductsIfAny(FAllProductsData ProductsData);
 };

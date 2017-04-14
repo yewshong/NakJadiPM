@@ -10,7 +10,8 @@
 			"LoadingPhase": "Default",
 			"AdditionalDependencies": [
 				"Engine",
-				"Paper2D"
+				"Paper2D",
+				"CoreUObject"
 			]
 		}
 	],
@@ -34,6 +35,10 @@
 		},
 		{
 			"Name": "Chartboost",
+			"Enabled": true
+		},
+		{
+			"Name": "OnlineFramework",
 			"Enabled": true
 		}
 	]

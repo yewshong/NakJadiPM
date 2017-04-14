@@ -1,6 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
+#include "InAppPurchaseStructLibrary.h"
 #include "ElectionDataManager.h"
 #include "GameFramework/Actor.h"
 #include "CandidateDataManager.generated.h"
@@ -297,6 +298,12 @@ struct FCurrentCampaignData
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
 		FAllCandidatesData CandidatesData;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
+		FAllPoliticPartyData PoliticPartiesData;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
+		FAllStaffUpgradeData StaffUpgradesData;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TArray<FParlimentSeatResult> SeatPossessionRecord;
 
@@ -322,8 +329,10 @@ struct FCurrentCampaignData
 		StatesData = FAllStatesData();
 		SkillsCostData = FAllSkillCostData();
 		CandidatesData = FAllCandidatesData();
+		PoliticPartiesData = FAllPoliticPartyData();
 		SeatPossessionRecord = TArray<FParlimentSeatResult>();
 		SkillUpgradeRecord = TArray<FSkillUpgradeInfo>();
+		 StaffUpgradesData = FAllStaffUpgradeData();
 	}
 
 	static bool VerifyCaimpagnData(FCurrentCampaignData Data)

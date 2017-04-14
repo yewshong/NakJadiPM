@@ -8,7 +8,7 @@ public class NakJadiPM : ModuleRules
 	{
 		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "UMG", "Slate", "SlateCore" });
 
-        PrivateDependencyModuleNames.AddRange(new string[] {  });
+        //PrivateDependencyModuleNames.AddRange(new string[] {  });
 
         //Uncomment if you are using Slate UI
         //PrivateDependencyModuleNames.AddRange(new string[] { "Slate", "SlateCore" });
@@ -19,7 +19,14 @@ public class NakJadiPM : ModuleRules
         // To include OnlineSubsystemSteam, add it to the plugins section in your uproject file with the Enabled attribute set to true
         if (Target.Platform == UnrealTargetPlatform.Android)
         {
-            PrivateDependencyModuleNames.AddRange(new string[] { "OnlineSubsystemGooglePlay", "AndroidAdvertising" });
+            //PrivateDependencyModuleNames.AddRange(new string[] { "OnlineSubsystemGooglePlay", "AndroidAdvertising" });
+            // DynamicallyLoadedModuleNames.Add("OnlineSubsystemGooglePlay");
+
+            //PrivateDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "OnlineSubsystem", "AndroidAdvertising" });
+            //DynamicallyLoadedModuleNames.Add("OnlineSubsystemGooglePlay");
+
+            PrivateDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "OnlineSubsystem", "AndroidAdvertising", "OnlineSubsystemGooglePlay" });
+            //DynamicallyLoadedModuleNames.Add("OnlineSubsystemGooglePlay");
         }
     }
 }

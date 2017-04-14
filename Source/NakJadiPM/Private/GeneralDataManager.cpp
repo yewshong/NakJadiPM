@@ -41,7 +41,9 @@ void AGeneralDataManager:: ConstructAllDataFromDataTable()
 	ConstructStatesDataFromDataTable();
 	ConstructSkillsDataFromDataTable();
 	ConstructActivateSkillsDataFromDataTable(); 
-	ConstructBalloonSkillsDataFromDataTable();
+	ConstructBalloonSkillsDataFromDataTable(); 
+	ConstructStaffUpgradesDataFromDataTable();
+	ConstructProductsDataFromDataTable();
 }
 
 void AGeneralDataManager::ConstructElectionDataFromDataTable()
@@ -224,6 +226,61 @@ void AGeneralDataManager::ConstructBalloonSkillsDataFromDataTable()
 		UE_LOG(LogTemp, Warning, TEXT("Balloon Skill data return false =.='"));
 }
 
+
+void AGeneralDataManager::ConstructStaffUpgradesDataFromDataTable()
+{
+	StaffUpgradesData = FAllStaffUpgradeData();
+	StaffUpgradesData.Version = DataVersion;
+	if (StaffUpgradeDataTable)
+	{
+		int RowIndex = 1;
+		bool TimetoBreak = false;
+		while (!TimetoBreak)
+		{
+			FName FindRowName = FName(*FString::FromInt(RowIndex));
+			FStaffUpgrade* Row = StaffUpgradeDataTable->FindRow<FStaffUpgrade>(FindRowName, FString(""));
+			if (Row)
+			{
+				StaffUpgradesData.StaffUpgrades.Add(*Row);
+				RowIndex++;
+			}
+			else
+			{
+				TimetoBreak = true;
+			}
+		}
+	}
+	else
+		UE_LOG(LogTemp, Warning, TEXT("Staff Upgrade data return false =.='"));
+}
+
+void AGeneralDataManager::ConstructProductsDataFromDataTable()
+{
+	ProductsData = FAllProductsData();
+	ProductsData.Version = DataVersion;
+	if (ProductsDataTable)
+	{
+		int RowIndex = 1;
+		bool TimetoBreak = false;
+		while (!TimetoBreak)
+		{
+			FName FindRowName = FName(*FString::FromInt(RowIndex));
+			FProductData* Row = ProductsDataTable->FindRow<FProductData>(FindRowName, FString(""));
+			if (Row)
+			{
+				ProductsData.Products.Add(*Row);
+				RowIndex++;
+			}
+			else
+			{
+				TimetoBreak = true;
+			}
+		}
+	}
+	else
+		UE_LOG(LogTemp, Warning, TEXT("Products data return false =.='"));
+}
+
 bool AGeneralDataManager::GameSaveDataExists()
 {
 	if (SaveGameManager)
@@ -251,6 +308,8 @@ bool AGeneralDataManager::CreateNewAndSaveGame(FCandidate SelectedCandidate, FPo
 	CampaignData.ActiveSkillData = ActivateSkillsData;
 	CampaignData.BalloonSkillData = BalloonSkillsData;
 	CampaignData.CandidatesData = CandidatesData;
+	CampaignData.PoliticPartiesData = PoliticPartiesData;
+	CampaignData.StaffUpgradesData = StaffUpgradesData;
 
 	for (int i = 0; i < SkillsCostData.SkillCosts.Num(); i++)
 	{
@@ -286,3 +345,42 @@ bool AGeneralDataManager::UpdateSaveGame(UCampaignSaveGame* ToBeSavedGame)
 }
 
 
+bool AGeneralDataManager::UpdateProductSave(UProductsSaveGame* ToBeSavedGame)
+{
+	if (SaveGameManager)
+		return SaveGameManager->UpdateProductSaveGame(ToBeSavedGame);
+	else
+		return false;
+}
+
+bool AGeneralDataManager::CreateNewProductsSave()
+{
+	if (SaveGameManager)
+		return SaveGameManager->CreateNewProductSaveGameAndSave(ProductsData);
+	else {
+		return false;
+	}
+}
+
+bool AGeneralDataManager::ProductsSaveDataExists()
+{
+	if (SaveGameManager)
+		return SaveGameManager->ProductsSaveExists();
+	else
+		return false;
+}
+
+
+bool AGeneralDataManager::ProcessProductsSaveGame()
+{
+	if (ProductsSaveDataExists())
+	{
+		SaveGameManager->UpdateProductsIfAny(ProductsData);
+	}
+	else
+	{
+		return CreateNewProductsSave();
+	}
+
+	return true;
+}

@@ -1,7 +1,8 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
-
+#include "ProductsSaveGame.h"
+#include "InAppPurchaseStructLibrary.h"
 #include "CandidateDataManager.h"
 #include "GameFramework/Actor.h"
 #include "SaveGameManager.h"
@@ -45,6 +46,12 @@ public:
 
 	UPROPERTY(EditAnywhere, Category = "DataTable")
 		UDataTable* BalloonSkillsDataTable;
+
+	UPROPERTY(EditAnywhere, Category = "DataTable")
+		UDataTable* StaffUpgradeDataTable;
+
+	UPROPERTY(EditAnywhere, Category = "DataTable")
+		UDataTable* ProductsDataTable;
 	
 	UFUNCTION(BlueprintCallable, Category = "DataTable")
 		void ConstructAllDataFromDataTable();
@@ -68,6 +75,12 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "DataTable")
 		void ConstructBalloonSkillsDataFromDataTable();
+
+	UFUNCTION(BlueprintCallable, Category = "DataTable")
+		void ConstructStaffUpgradesDataFromDataTable();
+
+	UFUNCTION(BlueprintCallable, Category = "DataTable")
+		void ConstructProductsDataFromDataTable();
 	
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
@@ -90,6 +103,12 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
 		FAllBalloonSkillsData BalloonSkillsData;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
+		FAllStaffUpgradeData StaffUpgradesData;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
+		FAllProductsData ProductsData;
 	
 	UFUNCTION(BlueprintCallable, Category = "SaveData")
 	bool GameSaveDataExists();
@@ -106,8 +125,19 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "Save")
 		bool UpdateSaveGame(UCampaignSaveGame* ToBeSavedGame);
-	
+
+
+	UFUNCTION(BlueprintCallable, Category = "SaveData")
+		bool ProductsSaveDataExists();
+	UFUNCTION(BlueprintCallable, Category = "SaveData")
+		bool CreateNewProductsSave();
+	UFUNCTION(BlueprintCallable, Category = "Save")
+		bool UpdateProductSave(UProductsSaveGame* ToBeSavedGame);
+	UFUNCTION(BlueprintCallable, Category = "Save")
+		bool ProcessProductsSaveGame();
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "SaveData")
 	ASaveGameManager* SaveGameManager = nullptr;
 	
 };
+																			
