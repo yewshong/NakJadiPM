@@ -311,14 +311,20 @@ bool AGeneralDataManager::CreateNewAndSaveGame(FCandidate SelectedCandidate, FPo
 	CampaignData.PoliticPartiesData = PoliticPartiesData;
 	CampaignData.StaffUpgradesData = StaffUpgradesData;
 
+	CampaignData.Balance += GetStartingBalance();
+
 	for (int i = 0; i < SkillsCostData.SkillCosts.Num(); i++)
 	{
-		if (i == 0)
-			CampaignData.ClickDamage = SkillsCostData.SkillCosts[i].Damage;
-
 		FSkillUpgradeInfo upgradeInfo = FSkillUpgradeInfo();
 		upgradeInfo.Index = i;
+
+		if (i == ClickSkillIndex)
+		{
+			upgradeInfo.Level = 1;
+			CampaignData.ClickDamage = 1;
+		}
 		CampaignData.SkillUpgradeRecord.Add(upgradeInfo);
+
 	}
 
 	if (SaveGameManager)
@@ -356,7 +362,7 @@ bool AGeneralDataManager::UpdateProductSave(UProductsSaveGame* ToBeSavedGame)
 bool AGeneralDataManager::CreateNewProductsSave()
 {
 	if (SaveGameManager)
-		return SaveGameManager->CreateNewProductSaveGameAndSave(ProductsData);
+		return SaveGameManager->CreateNewProductSaveGameAndSave(ProductsData,StaffUpgradesData);
 	else {
 		return false;
 	}
@@ -376,6 +382,7 @@ bool AGeneralDataManager::ProcessProductsSaveGame()
 	if (ProductsSaveDataExists())
 	{
 		SaveGameManager->UpdateProductsIfAny(ProductsData);
+		SaveGameManager->UpdateStaffUpgradesIfAny(StaffUpgradesData);
 	}
 	else
 	{
@@ -383,4 +390,24 @@ bool AGeneralDataManager::ProcessProductsSaveGame()
 	}
 
 	return true;
+}
+
+
+int AGeneralDataManager::GetStartingBalance()
+{
+	if (SaveGameManager)
+	{
+		auto CurrentProductsData = SaveGameManager->GetProductSaveGame();
+		if (CurrentProductsData)
+		{
+			for (auto A : CurrentProductsData->staffUpgradeRecords)
+			{
+				if (A.Type == EStaffUpgradeType::AddStartingGold)
+				{
+					return A.CurrentValue;
+				}
+			}
+		}
+	}
+	return 0;
 }

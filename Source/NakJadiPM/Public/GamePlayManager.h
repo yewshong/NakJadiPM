@@ -147,6 +147,9 @@ public:
 		void AddMedal(int number);
 	UFUNCTION(BlueprintCallable, Category = "Medal")
 		void MinusMedal(int number);
+	UFUNCTION(BlueprintCallable, Category = "Medal")
+		bool IsEnoughMedal(int MedalRequest);
+
 	UFUNCTION(BlueprintCallable, Category = "Product")
 		void ProductsInfoReceived(FString productID, FString DisplayPrice);
 	UFUNCTION(BlueprintCallable, Category = "Product")
@@ -155,6 +158,12 @@ public:
 		void ActivateNoAds();
 	UFUNCTION(BlueprintCallable, Category = "Product")
 		void RecordConsumed(FString ProductID, FString TransactionID);
+	UFUNCTION(BlueprintCallable, Category = "Staff")
+	void ProcessStaffUpgrade(FString StaffName, int MedalCost);
+	UFUNCTION(BlueprintCallable, Category = "Staff")
+		float GetBonusVPSMultiplier();
+	UFUNCTION(BlueprintCallable, Category = "Staff")
+		float GetBonusClickMultiplier();
 
 	UPROPERTY(EditAnywhere, Category = "GameProperties")
 		float OpponentBaseVPS = 0.1f;

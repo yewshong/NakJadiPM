@@ -111,12 +111,19 @@ bool ASaveGameManager::ProductsSaveExists()
 	return false;
 }
 
-bool ASaveGameManager::CreateNewProductSaveGameAndSave(FAllProductsData ProductsData)
+bool ASaveGameManager::CreateNewProductSaveGameAndSave(FAllProductsData ProductsData, FAllStaffUpgradeData StaffUpgradesData)
 {
 
 	UE_LOG(LogTemp, Error, TEXT("Trying To Create product save game"));
 	UProductsSaveGame* SaveGameInstance = Cast<UProductsSaveGame>(UGameplayStatics::CreateSaveGameObject(UProductsSaveGame::StaticClass()));
 	SaveGameInstance->AllProductsData = ProductsData;
+
+	for(FStaffUpgrade upgrade : StaffUpgradesData.StaffUpgrades)
+	{
+		FStaffUpgradeRecord upgradeRecord = UNJPUtilityFunctionLibrary::CreateStaffUpgradeRecord(upgrade,0);
+		SaveGameInstance->staffUpgradeRecords.Add(upgradeRecord);
+	}
+
 	return UGameplayStatics::SaveGameToSlot(SaveGameInstance, SaveGameInstance->SaveSlotName, SaveGameInstance->UserIndex);
 }
 
@@ -148,3 +155,24 @@ void ASaveGameManager::UpdateProductsIfAny(FAllProductsData ProductsData)
 	return;
 }
 
+void ASaveGameManager::UpdateStaffUpgradesIfAny(FAllStaffUpgradeData StaffUpgrades)
+{
+	for (FStaffUpgrade StaffUpgrade : StaffUpgrades.StaffUpgrades)
+	{
+		bool found = false;
+		for (FStaffUpgradeRecord StaffUpgradeRecord : CurrentProductSaveGame->staffUpgradeRecords)
+		{
+			if (StaffUpgrade.Name == StaffUpgradeRecord.Name)
+			{
+				found = true;
+				break;
+			}
+		}
+		if (!found)
+		{
+			CurrentProductSaveGame->staffUpgradeRecords.Add(UNJPUtilityFunctionLibrary::CreateStaffUpgradeRecord(StaffUpgrade,0));
+		}
+	}
+	UpdateProductSaveGame(CurrentProductSaveGame);
+	
+}

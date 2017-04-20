@@ -1,9 +1,9 @@
 {
 	"Changelist" : 3249277,
 	"CompatibleChangelist" : 3195953,
-	"BuildId" : "50c90c88-aab0-4ac1-9fe4-121362f23195",
+	"BuildId" : "cc37850d-1d3d-4572-af12-73c734bf3fbd",
 	"Modules" : 
 	{
-		"Chartboost" : "UE4Editor-Chartboost-6280.dll"
+		"Chartboost" : "UE4Editor-Chartboost-3920.dll"
 	}
 }

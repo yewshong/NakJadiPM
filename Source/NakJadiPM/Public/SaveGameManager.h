@@ -1,6 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
+#include "NJPUtilityFunctionLibrary.h"
 #include "ProductsSaveGame.h"
 #include "CampaignSaveGame.h"
 #include "GameFramework/Actor.h"
@@ -46,10 +47,14 @@ public:
 		bool ProductsSaveExists();
 	
 	UFUNCTION(BlueprintCallable, Category = "Save")
-		bool CreateNewProductSaveGameAndSave(FAllProductsData ProductsData);
+		bool CreateNewProductSaveGameAndSave(FAllProductsData ProductsData, FAllStaffUpgradeData StaffUpgradesData);
 
 	UFUNCTION(BlueprintCallable, Category = "Save")
 		bool UpdateProductSaveGame(UProductsSaveGame* ToBeSavedGame);
 	UFUNCTION(BlueprintCallable, Category = "Save")
 		void UpdateProductsIfAny(FAllProductsData ProductsData);
+
+	UFUNCTION(BlueprintCallable, Category = "Save")
+		void UpdateStaffUpgradesIfAny(FAllStaffUpgradeData StaffUpgrades);
+
 };

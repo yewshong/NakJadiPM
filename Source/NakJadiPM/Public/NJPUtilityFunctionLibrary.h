@@ -1,7 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
-
+#include "InAppPurchaseStructLibrary.h"
 #include "CandidateDataManager.h"
 #include "Kismet/BlueprintFunctionLibrary.h"
 #include "NJPUtilityFunctionLibrary.generated.h"
@@ -40,4 +40,22 @@ public:
 	
 	UFUNCTION(BlueprintCallable, Category = "NJPUtility")
 		static int CalculateBalloonEffect(FBalloonSkill BalloonSkill, FCurrentCampaignData CampaignData);
+
+	UFUNCTION(BlueprintCallable, Category = "NJPUtility")
+		static int CalculateStaffLevelUpCost(FStaffUpgrade StaffUpgrade, int Level);
+
+	UFUNCTION(BlueprintCallable, Category = "NJPUtility")
+		static float CalculateStaffEffectByLevel(FStaffUpgrade StaffUpgrade, int Level);
+
+	UFUNCTION(BlueprintCallable, Category = "NJPUtility")
+		static FStaffUpgradeRecord CreateStaffUpgradeRecord(FStaffUpgrade StaffUpgrade, int Level);
+
+	UFUNCTION(BlueprintCallable, Category = "NJPUtility")
+		static float ProcessGainsAfterBonus(float Gain, float Bonus);
+
+	UFUNCTION(BlueprintCallable, Category = "NJPUtility")
+		static float RecalculateVPS(FCurrentCampaignData &CampaignData, float Bonus, int ClickSkillIndex);
+	UFUNCTION(BlueprintCallable, Category = "NJPUtility")
+		static float RecalculateClickGain(FCurrentCampaignData &CampaignData,float Bonus, int ClickSkillIndex);
+
 };

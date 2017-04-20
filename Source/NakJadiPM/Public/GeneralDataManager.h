@@ -138,6 +138,12 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "SaveData")
 	ASaveGameManager* SaveGameManager = nullptr;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ClickSkillIndex")
+		int ClickSkillIndex = 0;
+
+	UFUNCTION(BlueprintCallable, Category = "Staff")
+		int GetStartingBalance();
 	
 };
 																			

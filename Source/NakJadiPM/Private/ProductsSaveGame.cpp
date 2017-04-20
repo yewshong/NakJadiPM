@@ -7,10 +7,10 @@ UProductsSaveGame::UProductsSaveGame()
 {
 	SaveSlotName = TEXT("ProductData");
 	UserIndex = 0;
-	Medal = 5;
+	Medal = StartMedal;
 	ConsumedRecords = TArray<FConsumedRecord>();
 	AllProductsData = FAllProductsData();
-
+	staffUpgradeRecords = TArray<FStaffUpgradeRecord>();
 	NoAds = false;
 	NoAdsActivated = true;
 }

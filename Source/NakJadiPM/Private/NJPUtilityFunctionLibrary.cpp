@@ -89,3 +89,95 @@ int UNJPUtilityFunctionLibrary::CalculateBalloonEffect(FBalloonSkill BalloonSkil
 	}
 	return 0;
 }
+
+
+int UNJPUtilityFunctionLibrary::CalculateStaffLevelUpCost(FStaffUpgrade StaffUpgrade, int Level)
+{
+
+	if (Level == 0)
+		return StaffUpgrade.MedalStartCost;
+
+	switch (StaffUpgrade.CostUpgradeEffect)
+	{
+	case ELevelEffect::AddByLevel: return (int)( StaffUpgrade.MedalStartCost + (StaffUpgrade.costMultiplier*(Level-1))); break;
+		case ELevelEffect::MultiplyAdd:
+			float result = StaffUpgrade.MedalStartCost;
+			for (int i = 1; i < Level; i++)
+			{
+				result += result * StaffUpgrade.costMultiplier;
+			}
+			return (int)result;
+	}
+	return 1;
+}
+
+float UNJPUtilityFunctionLibrary::CalculateStaffEffectByLevel(FStaffUpgrade StaffUpgrade, int Level)
+{
+	if (Level == 0)
+		return 0;
+
+	switch (StaffUpgrade.LevelUpEffect) 
+	{
+	case ELevelEffect::AddByLevel: 
+			return FMath::CeilToInt(StaffUpgrade.LevelStartEffectNumber + (StaffUpgrade.LevelEffectNumber*(Level-1))); break;
+	case ELevelEffect::MultiplyAdd:
+		
+		float result = StaffUpgrade.LevelStartEffectNumber;
+		for (int i = 1; i < Level; i++)
+		{
+			result += result * StaffUpgrade.LevelEffectNumber;
+		}
+		return FMath::CeilToInt(result);
+		
+	}
+	return 1; 
+}
+
+FStaffUpgradeRecord UNJPUtilityFunctionLibrary::CreateStaffUpgradeRecord(FStaffUpgrade StaffUpgrade,int Level)
+{
+	FStaffUpgradeRecord upgradeRecord = FStaffUpgradeRecord();
+	upgradeRecord.Name = StaffUpgrade.Name;
+	upgradeRecord.Type = StaffUpgrade.Type;
+	upgradeRecord.CurrentLevel = Level;
+	upgradeRecord.CurrentValue = CalculateStaffEffectByLevel(StaffUpgrade, upgradeRecord.CurrentLevel);
+	upgradeRecord.NextValue = CalculateStaffEffectByLevel(StaffUpgrade, upgradeRecord.CurrentLevel + 1);
+	upgradeRecord.LevelUpCost = CalculateStaffLevelUpCost(StaffUpgrade, upgradeRecord.CurrentLevel);
+	return upgradeRecord;
+}
+
+
+float UNJPUtilityFunctionLibrary::ProcessGainsAfterBonus(float Gain, float Bonus)
+{
+	if (Bonus > 0)
+		return Gain += Gain * (Bonus / 100);
+	else
+		return Gain;
+}
+
+
+float UNJPUtilityFunctionLibrary::RecalculateVPS(FCurrentCampaignData &CampaignData, float Bonus,int ClickSkillIndex)
+{
+	float result = 0;
+	for (int i = 0;  i < CampaignData.SkillUpgradeRecord.Num(); i++)
+	{
+		if(i != ClickSkillIndex)
+		result += CampaignData.SkillUpgradeRecord[i].Level * CampaignData.SkillsCostData.SkillCosts[i].Damage;
+	}
+	
+	return ProcessGainsAfterBonus(result, Bonus);
+}
+
+float UNJPUtilityFunctionLibrary::RecalculateClickGain(FCurrentCampaignData &CampaignData, float Bonus, int ClickSkillIndex)
+{
+	if (CampaignData.SkillUpgradeRecord.IsValidIndex(ClickSkillIndex) &&
+		CampaignData.SkillsCostData.SkillCosts.IsValidIndex(ClickSkillIndex))
+	{
+		//GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Blue, FString::Printf(TEXT("Gain : %f"), CampaignData.SkillsCostData.SkillCosts[ClickSkillIndex].Damage * CampaignData.SkillUpgradeRecord[ClickSkillIndex].Level));
+		//GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Blue, FString::Printf(TEXT("Bonus : %f"), Bonus));
+		float ClickDamage = FMath::Max(1.0f, CampaignData.SkillsCostData.SkillCosts[ClickSkillIndex].Damage * CampaignData.SkillUpgradeRecord[ClickSkillIndex].Level);
+		return ProcessGainsAfterBonus(ClickDamage, Bonus);
+
+	}
+
+	return 1;
+}

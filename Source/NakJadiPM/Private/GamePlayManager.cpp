@@ -36,8 +36,18 @@ void AGamePlayManager::Initialize()
 		if (DataManager && DataManager->SaveGameManager)
 			CurrentGameData = DataManager->SaveGameManager->GetCampaignSaveGame();
 
+
+		if (DataManager && DataManager->SaveGameManager)
+			CurrentProductsData = DataManager->SaveGameManager->GetProductSaveGame();
+
 		if (CurrentGameData)
 		{
+
+			CurrentGameData->CampaignData.ClickDamage = UNJPUtilityFunctionLibrary::RecalculateClickGain(CurrentGameData->CampaignData, GetBonusClickMultiplier(), ClickSkillIndex);
+			CurrentGameData->CampaignData.ClickDamage = UNJPUtilityFunctionLibrary::ConvertTo2Decimals(CurrentGameData->CampaignData.ClickDamage);
+			CurrentGameData->CampaignData.VotesPerSecond = UNJPUtilityFunctionLibrary::RecalculateVPS(CurrentGameData->CampaignData, GetBonusVPSMultiplier(), ClickSkillIndex);
+			CurrentGameData->CampaignData.VotesPerSecond = UNJPUtilityFunctionLibrary::ConvertTo2Decimals(CurrentGameData->CampaignData.VotesPerSecond);
+
 			ProcessParlimentSeatsResult();
 			ProcessGameResume();
 
@@ -47,9 +57,6 @@ void AGamePlayManager::Initialize()
 			FTimerHandle AutoSaveTimerHandle = FTimerHandle();
 			GetWorldTimerManager().SetTimer(AutoSaveTimerHandle, this, &AGamePlayManager::SaveCurrentGame, UpdateTimeSpan.GetSeconds(), true);
 		}
-
-		if (DataManager && DataManager->SaveGameManager)
-			CurrentProductsData = DataManager->SaveGameManager->GetProductSaveGame();
 	}
 }
 
@@ -94,27 +101,26 @@ void AGamePlayManager::ProcessPlayerClick()
 void AGamePlayManager::AddPlayerClick()
 {
 	CurrentGameData->CampaignData.Balance += CurrentGameData->CampaignData.ClickDamage;
-	AddVotesToSeats(CurrentGameData->CampaignData.ClickDamage);
+	AddVotesToSeats(CurrentGameData->CampaignData.ClickDamage * GetBonusClickMultiplier());
 }
 
 void AGamePlayManager::ProcessPlayerUpgrade(int SkillIndex, float Cost)
 { 
 	if (CurrentGameData)
 	{
+		CurrentGameData->CampaignData.SkillUpgradeRecord[SkillIndex].Level += 1;
 		if (SkillIndex == ClickSkillIndex)
 		{
 			CurrentGameData->CampaignData.ClickDamage += 
 			CurrentGameData->CampaignData.SkillsCostData.SkillCosts[SkillIndex].Damage;
+			CurrentGameData->CampaignData.ClickDamage = UNJPUtilityFunctionLibrary::RecalculateClickGain(CurrentGameData->CampaignData, GetBonusClickMultiplier(), ClickSkillIndex);
 			CurrentGameData->CampaignData.ClickDamage = UNJPUtilityFunctionLibrary::ConvertTo2Decimals(CurrentGameData->CampaignData.ClickDamage);
 		}
 		else
 		{
-			CurrentGameData->CampaignData.VotesPerSecond +=
-				CurrentGameData->CampaignData.SkillsCostData.SkillCosts[SkillIndex].Damage;
+			CurrentGameData->CampaignData.VotesPerSecond = UNJPUtilityFunctionLibrary::RecalculateVPS(CurrentGameData->CampaignData, GetBonusVPSMultiplier(),ClickSkillIndex);
 			CurrentGameData->CampaignData.VotesPerSecond = UNJPUtilityFunctionLibrary::ConvertTo2Decimals(CurrentGameData->CampaignData.VotesPerSecond);
-
 		}
-		CurrentGameData->CampaignData.SkillUpgradeRecord[SkillIndex].Level += 1;
 		CurrentGameData->CampaignData.Balance -= Cost;
 		SaveCurrentGame();
 	}
@@ -192,8 +198,7 @@ void AGamePlayManager::ProcessByTimeSpan(FTimespan GainTimeSpan, FTimespan doubl
 {
 	FTimespan playerTimeSpan = GainTimeSpan + doubleIdleTimeSpan;
 	FTimespan OpponentTimeSpan = GainTimeSpan;
-	CurrentGameData->CampaignData.Balance += playerTimeSpan.GetTotalSeconds()*
-		CurrentGameData->CampaignData.VotesPerSecond;
+	CurrentGameData->CampaignData.Balance += playerTimeSpan.GetTotalSeconds()*CurrentGameData->CampaignData.VotesPerSecond;
 	
 	for (int i = 0; i < playerTimeSpan.GetTotalSeconds(); i++)
 	{
@@ -408,31 +413,22 @@ void AGamePlayManager::ProcessFinishedReport()
 
 void AGamePlayManager::ProcessVideoRewardAfterPlayed(EAdsRequestType requestType, EActiveSkillType skillType)
 {
-
 	if (GEngine)
 		GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Blue, TEXT("Begin ProcessVideoReward"));
 	if (requestType == EAdsRequestType::Skill )
 	{
 		if (CurrentGameData && DataManager)
 		{
-
-			if (GEngine)
-				GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Blue, TEXT("number of active skill record :"+ FString::FromInt(CurrentGameData->CampaignData.ActiveSkillData.ActiveSkills.Num())));
-
 			for (int i = 0; i < CurrentGameData->CampaignData.ActiveSkillData.ActiveSkills.Num(); i++)
 			{
 				if (CurrentGameData->CampaignData.ActiveSkillData.ActiveSkills[i].SkillType == skillType)
 				{
-					if (GEngine)
-						GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Blue, TEXT("Skill Type Found"));
 					AddActiveSkill(CurrentGameData->CampaignData.ActiveSkillData.ActiveSkills[i]);
 					break;
 				}
 			}
 		}
 	}
-	if (GEngine)
-		GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Blue, TEXT("Finished ProcessVideoReward"));
 }
 
 void  AGamePlayManager::AddActiveSkill(FActiveSkill skill)
@@ -585,7 +581,7 @@ FBalloonSkill AGamePlayManager::GetRandomBalloonSkill()
 void AGamePlayManager::ActivateBalloonSkill(FBalloonSkill BalloonSkill)
 {
 	int effectNumber = UNJPUtilityFunctionLibrary::CalculateBalloonEffect(BalloonSkill, CurrentGameData->CampaignData);
-	effectNumber = FMath::Max(1, effectNumber);
+	effectNumber = FMath::Max(BalloonSkill.MinimumNumber, effectNumber);
 	switch (BalloonSkill.Type)
 	{
 	case EBalloonEffectType::AddGold: 
@@ -647,16 +643,13 @@ void AGamePlayManager::SaveCurrentProducts()
 
 void AGamePlayManager::ProductsInfoReceived(FString productID, FString DisplayPrice)
 {
-	GEngine->AddOnScreenDebugMessage(-1, 300.0f, FColor::Yellow, FString::Printf(TEXT("Trying to update product %s, price : %s"), *productID, *DisplayPrice));
 	if (CurrentProductsData && DataManager)
 	{
-		GEngine->AddOnScreenDebugMessage(-1, 300.0f, FColor::Yellow, FString::Printf(TEXT("Updating product %s, price : %s"), *productID, *DisplayPrice));
 		for (int i = 0; i < CurrentProductsData->AllProductsData.Products.Num(); i++)
 		{
 			if (CurrentProductsData->AllProductsData.Products[i].ProductID == productID)
 			{
 				CurrentProductsData->AllProductsData.Products[i].DisplayPrice = FText::FromString(DisplayPrice);
-				GEngine->AddOnScreenDebugMessage(-1, 300.0f, FColor::Yellow, FString::Printf(TEXT("Updated product %s, price : %s"), *productID, *DisplayPrice));
 				break;
 			}
 		}
@@ -703,4 +696,100 @@ void AGamePlayManager::RecordConsumed(FString ProductID, FString TransactionID)
 		newRecord.UsedDate = FDateTime::Now();
 		CurrentProductsData->ConsumedRecords.Add(newRecord);
 	}
+}
+
+void AGamePlayManager::ProcessStaffUpgrade(FString StaffName, int MedalCost)
+{
+	if (CurrentProductsData && CurrentGameData)
+	{
+		if (CurrentProductsData->Medal > MedalCost)
+		{
+			CurrentProductsData->Medal -= MedalCost;
+			for (int i = 0; i < CurrentProductsData->staffUpgradeRecords.Num(); i++)
+			{
+				if (CurrentProductsData->staffUpgradeRecords[i].Name == StaffName)
+				{
+					for(auto StaffUpgradeData : CurrentGameData->CampaignData.StaffUpgradesData.StaffUpgrades)
+					{ 
+						if (StaffUpgradeData.Name == StaffName)
+						{
+							//add balance if the upgrade is add starting gold before upgrade
+							if (StaffUpgradeData.Type == EStaffUpgradeType::AddStartingGold)
+							{
+								CurrentGameData->CampaignData.Balance += CurrentProductsData->staffUpgradeRecords[i].NextValue -
+									CurrentProductsData->staffUpgradeRecords[i].CurrentValue;
+							} 
+
+							CurrentProductsData->staffUpgradeRecords[i] = UNJPUtilityFunctionLibrary::CreateStaffUpgradeRecord(StaffUpgradeData, 
+								CurrentProductsData->staffUpgradeRecords[i].CurrentLevel+1);
+
+							//CalculateVPS after upgrade
+							if (StaffUpgradeData.Type == EStaffUpgradeType::AddVPS)
+							{
+								CurrentGameData->CampaignData.VotesPerSecond = UNJPUtilityFunctionLibrary::RecalculateVPS(CurrentGameData->CampaignData, GetBonusVPSMultiplier(),ClickSkillIndex);
+								CurrentGameData->CampaignData.VotesPerSecond = UNJPUtilityFunctionLibrary::ConvertTo2Decimals(CurrentGameData->CampaignData.VotesPerSecond);
+							}
+							else if (StaffUpgradeData.Type == EStaffUpgradeType::AddClick)
+							{
+								CurrentGameData->CampaignData.ClickDamage = UNJPUtilityFunctionLibrary::RecalculateClickGain(CurrentGameData->CampaignData, GetBonusClickMultiplier(), ClickSkillIndex);
+								CurrentGameData->CampaignData.ClickDamage = UNJPUtilityFunctionLibrary::ConvertTo2Decimals(CurrentGameData->CampaignData.ClickDamage);
+							}
+
+							break;
+						}
+					}
+				}
+			}
+			DataManager->UpdateProductSave(CurrentProductsData);
+		}
+		return;
+	}
+}
+
+
+bool AGamePlayManager::IsEnoughMedal(int MedalRequest)
+{
+	if (CurrentProductsData)
+	{
+		if (CurrentProductsData->Medal >= MedalRequest)
+			return true;
+		else
+			return false;
+	}
+	return false;
+}
+
+float AGamePlayManager::GetBonusVPSMultiplier()
+{
+	if (CurrentProductsData)
+	{
+		for(auto A : CurrentProductsData->staffUpgradeRecords)
+		{
+			if (A.Type == EStaffUpgradeType::AddVPS)
+			{
+				return A.CurrentValue;
+			}
+		}
+	}
+
+	return 0;
+}
+
+
+float AGamePlayManager::GetBonusClickMultiplier()
+{
+	float result = 0;
+	if (CurrentProductsData)
+	{
+		for (auto A : CurrentProductsData->staffUpgradeRecords)
+		{
+			if (A.Type == EStaffUpgradeType::AddClick)
+			{
+				result = A.CurrentValue;
+			}
+		}
+	}
+
+	return result;
+
 }

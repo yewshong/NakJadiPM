@@ -8,7 +8,14 @@ enum class EStaffUpgradeType : uint8
 {
 	AddVPS,
 	AddStartingGold,
-	Add,
+	AddClick,
+};
+
+UENUM(BlueprintType)
+enum class ELevelEffect : uint8
+{
+	MultiplyAdd,
+	AddByLevel,
 };
 
 USTRUCT(BlueprintType)
@@ -19,16 +26,30 @@ struct FStaffUpgrade : public FTableRowBase
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 		FString Name;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-		FString Description;
+		FText DisplayName;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+		FText Description;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 		EStaffUpgradeType Type;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-		float StartingCost;
+		ELevelEffect LevelUpEffect;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-		float AddPerCentAfterUpgrade;
+		float LevelEffectNumber;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+		float LevelStartEffectNumber;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+		int MedalStartCost;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+		float costMultiplier;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+		ELevelEffect CostUpgradeEffect;
 };
 
 USTRUCT(BlueprintType)
@@ -57,7 +78,16 @@ struct FStaffUpgradeRecord : public FTableRowBase
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 		FString Name;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+		EStaffUpgradeType Type;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 		int CurrentLevel;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+		float CurrentValue;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+		float NextValue;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+		int LevelUpCost;
 
 };
 

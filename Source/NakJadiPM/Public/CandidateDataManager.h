@@ -103,7 +103,9 @@ struct FActiveSkill : public FTableRowBase
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 		EActiveSkillType SkillType;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-		FString DisplayName;
+		FText DisplayName;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+		FText Description;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 		FTimespan Duration;
 };
@@ -159,6 +161,8 @@ struct FBalloonSkill : public FTableRowBase
 		EBalloonEffectFactorType Factor;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	int Number;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+		int MinimumNumber;
 };
 
 USTRUCT(BlueprintType)

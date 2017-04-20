@@ -36,7 +36,11 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
 		FAllProductsData AllProductsData;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
+		TArray<FStaffUpgradeRecord> staffUpgradeRecords;
+
 	UFUNCTION()
 		void UpdateProductInfo(FString &ID, FString &DisplayProce);
-	
+private:
+	int StartMedal = 500;
 };
