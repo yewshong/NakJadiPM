@@ -327,6 +327,15 @@ bool AGeneralDataManager::CreateNewAndSaveGame(FCandidate SelectedCandidate, FPo
 
 	}
 
+	for (int i = 0; i < CampaignData.ActiveSkillData.ActiveSkills.Num(); i++)
+	{
+		FActivatedSkill activatedSkill = FActivatedSkill();
+		activatedSkill.SkillType = CampaignData.ActiveSkillData.ActiveSkills[i].SkillType;
+		activatedSkill.EndTime = FDateTime::Now();
+		activatedSkill.StartTime = FDateTime::Now();
+		CampaignData.ActivatedSkillRecord.Add(activatedSkill);
+	}
+
 	if (SaveGameManager)
 		return SaveGameManager->CreateNewAndSaveGame(CampaignData);
 	else {

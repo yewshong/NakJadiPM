@@ -101,7 +101,7 @@ void AGamePlayManager::ProcessPlayerClick()
 void AGamePlayManager::AddPlayerClick()
 {
 	CurrentGameData->CampaignData.Balance += CurrentGameData->CampaignData.ClickDamage;
-	AddVotesToSeats(CurrentGameData->CampaignData.ClickDamage * GetBonusClickMultiplier());
+	AddVotesToSeats(CurrentGameData->CampaignData.ClickDamage);
 }
 
 void AGamePlayManager::ProcessPlayerUpgrade(int SkillIndex, float Cost)
@@ -138,7 +138,7 @@ void AGamePlayManager::ProcessParlimentSeatsResult()
 			SeatResult.possesion = 0;
 			//todo add candidate
 			SeatResult.OpponentIndex = GetRandomOpponentIndex(CurrentGameData->CampaignData.SelectedCandidate.Name);
-			SeatResult.OpponentVPS = OpponentBaseVPS + (OpponentVPSAddictive*SeatResult.Index);
+			SeatResult.OpponentVPS = UNJPUtilityFunctionLibrary::RecalculateOpponentVPS(CurrentGameData->CampaignData.SeatPossessionRecord.Num(), 1);// OpponentBaseVPS + (OpponentVPSAddictive*SeatResult.Index);
 			SeatResult.OpponentPossesion = 0;
 			SeatResult.PartiIndex = GetRandomPartiIndex(CurrentGameData->CampaignData.SelectedParty.Name);
 			CurrentGameData->CampaignData.SeatPossessionRecord.Add(SeatResult);
@@ -158,7 +158,7 @@ void AGamePlayManager::ProcessParlimentSeatsResult()
 					SeatResult.Index = CurrentGameData->CampaignData.SeatPossessionRecord.Num();
 					SeatResult.possesion = 0;
 					SeatResult.OpponentIndex = GetRandomOpponentIndex(CurrentGameData->CampaignData.SelectedCandidate.Name);
-					SeatResult.OpponentVPS = OpponentBaseVPS + (OpponentVPSAddictive*SeatResult.Index);
+					SeatResult.OpponentVPS = UNJPUtilityFunctionLibrary::RecalculateOpponentVPS(CurrentGameData->CampaignData.SeatPossessionRecord.Num(), 1); //OpponentBaseVPS + (OpponentVPSAddictive*SeatResult.Index);
 					SeatResult.OpponentPossesion = 0;
 					SeatResult.PartiIndex = GetRandomPartiIndex(CurrentGameData->CampaignData.SelectedParty.Name);
 					CurrentGameData->CampaignData.SeatPossessionRecord.Add(SeatResult);
@@ -251,8 +251,8 @@ void AGamePlayManager::AddVotesToSeats(float VoteCount)
 			if (CurrentGameData->CampaignData.Finished)
 				return;
 
-			if (VotesCurrent > 0)
-				AddVotesToSeats(VotesCurrent);
+			//if (VotesCurrent > 0)// remove this to make sure no votes carry over by click
+			//	AddVotesToSeats(VotesCurrent);
 		}
 	}
 }
@@ -402,12 +402,16 @@ void AGamePlayManager::FireShowResumeDialogueEvent(float IdleGains)
 	UE_LOG(LogTemp, Warning, TEXT("Show Resume Dialogue! Idle Gains: %f"),IdleGains);
 }
 
-void AGamePlayManager::ProcessFinishedReport()
+void AGamePlayManager::ProcessFinishedReport(int MedalsEarned)
 {
 	if (CurrentGameData && DataManager)
-	{
-		CurrentGameData->CampaignData.FinishedReported = true;
-		DataManager->UpdateSaveGame(CurrentGameData);
+	{ 
+		if (CurrentGameData->CampaignData.FinishedReported == false)
+		{
+			AddMedal(MedalsEarned);
+			CurrentGameData->CampaignData.FinishedReported = true;
+			DataManager->UpdateSaveGame(CurrentGameData);
+		}
 	}
 }
 
@@ -621,6 +625,7 @@ void  AGamePlayManager::AddMedal(int number)
 	if (CurrentProductsData && DataManager)
 	{
 		CurrentProductsData->Medal += number;
+		SaveCurrentProducts();
 	}
 }
 
@@ -629,6 +634,7 @@ void AGamePlayManager::MinusMedal(int number)
 	if (CurrentProductsData && DataManager)
 	{
 		CurrentProductsData->Medal -= number;
+		SaveCurrentProducts();
 	}
 }
 
@@ -791,5 +797,13 @@ float AGamePlayManager::GetBonusClickMultiplier()
 	}
 
 	return result;
+}
 
+bool AGamePlayManager::IsNoAds()
+{
+	if (CurrentProductsData)
+	{
+		return CurrentProductsData->NoAds;
+	}
+	return false;
 }

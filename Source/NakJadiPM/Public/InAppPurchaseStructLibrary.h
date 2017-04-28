@@ -148,6 +148,24 @@ struct FAllProductsData : public FTableRowBase
 	}
 };
 
+USTRUCT(BlueprintType)
+struct FMedalAdsRecord : public FTableRowBase
+{
+	GENERATED_USTRUCT_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FDateTime LastClaimTime;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FTimespan Cooldown;
+
+	FMedalAdsRecord()
+	{
+		Cooldown = FTimespan(0, 15, 0);
+		LastClaimTime = FDateTime::Now() - Cooldown;
+	}
+};
+
 
 /**
  * 

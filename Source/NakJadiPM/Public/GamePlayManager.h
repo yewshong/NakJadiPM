@@ -17,8 +17,7 @@ class NAKJADIPM_API AGamePlayManager : public AActor
 	GENERATED_BODY()
 		DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FShowResumeDialogue, float, idleGain);
 public:	
-
-
+	
 	UFUNCTION(BlueprintCallable, Category = "Event")
 		void FireShowResumeDialogueEvent(float IdleGains);
 
@@ -111,7 +110,7 @@ public:
 		void SaveCurrentProducts();
 
 	UFUNCTION(BlueprintCallable, Category = "Processing")
-		void ProcessFinishedReport();
+		void ProcessFinishedReport(int MedalsEarned);
 
 	UFUNCTION(BlueprintCallable, Category = "Processing")
 		void ProcessVideoRewardAfterPlayed(EAdsRequestType requestType,EActiveSkillType skillType);
@@ -150,6 +149,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Medal")
 		bool IsEnoughMedal(int MedalRequest);
 
+	UFUNCTION(BlueprintPure, Category = "Medal")
+		bool IsNoAds();
+
 	UFUNCTION(BlueprintCallable, Category = "Product")
 		void ProductsInfoReceived(FString productID, FString DisplayPrice);
 	UFUNCTION(BlueprintCallable, Category = "Product")
@@ -173,5 +175,7 @@ public:
 		float WinPercentageThreshold = 50.0f;
 	UPROPERTY(EditAnywhere, Category = "GameProperties")
 		double TotalSecondsInOneDay = 86400.0f;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "GameProperties")
+		int WatchAdsReward = 5;
 
 };

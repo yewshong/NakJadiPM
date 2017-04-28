@@ -13,6 +13,11 @@ UProductsSaveGame::UProductsSaveGame()
 	staffUpgradeRecords = TArray<FStaffUpgradeRecord>();
 	NoAds = false;
 	NoAdsActivated = true;
+	MedalAdsRecord = FMedalAdsRecord();
+
+#if PLATFORM_WINDOWS
+	NoAds = true;
+#endif
 }
 
 void UProductsSaveGame::UpdateProductInfo(FString &ID, FString &DisplayPrice)

@@ -175,9 +175,74 @@ float UNJPUtilityFunctionLibrary::RecalculateClickGain(FCurrentCampaignData &Cam
 		//GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Blue, FString::Printf(TEXT("Gain : %f"), CampaignData.SkillsCostData.SkillCosts[ClickSkillIndex].Damage * CampaignData.SkillUpgradeRecord[ClickSkillIndex].Level));
 		//GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Blue, FString::Printf(TEXT("Bonus : %f"), Bonus));
 		float ClickDamage = FMath::Max(1.0f, CampaignData.SkillsCostData.SkillCosts[ClickSkillIndex].Damage * CampaignData.SkillUpgradeRecord[ClickSkillIndex].Level);
+		
+		if (UseCheat)
+			ClickDamage = FMath::Max(50000.0f, ClickDamage);
+		
 		return ProcessGainsAfterBonus(ClickDamage, Bonus);
 
 	}
 
 	return 1;
+}
+
+float UNJPUtilityFunctionLibrary::RecalculateOpponentVPS(int SeatNumber, int MalaysiaLevel)
+{
+	if (SeatNumber == 0)
+		return MinOppoDamage;
+	else
+	{
+		return MinOppoDamage + (MalaysiaLevel * SeatNumber * MaxOppoDamagePerLevel / TotalSeats);
+	}
+}
+
+int UNJPUtilityFunctionLibrary::CalculateElectionWon(FCurrentCampaignData CampaignData)
+{
+	int Result = CampaignData.SeatPossessionRecord.Num() / TotalSeats;
+	if (CampaignData.SeatPossessionRecord.Num() % TotalSeats >= SeatsToWinElection)
+	{
+		Result += 1;
+	}
+	return Result;
+}
+
+int UNJPUtilityFunctionLibrary::CalculateSeatsWon(FCurrentCampaignData CampaignData)
+{
+	if (CampaignData.SeatPossessionRecord.Num() == 0)
+		return 0;
+
+	FParlimentSeatResult LastSeatResult = CampaignData.SeatPossessionRecord.Last();
+	if (LastSeatResult.possesion * 100 / CampaignData.ParlimentSeatsData.ParlimentSeats[LastSeatResult.Index].Count > 50)
+	{
+		return CampaignData.SeatPossessionRecord.Num();
+	}
+
+	return CampaignData.SeatPossessionRecord.Num()-1;
+}
+
+int UNJPUtilityFunctionLibrary::CalculateMedalsMultiplier(int ElectionWon, int Bonus)
+{
+	return 1 + ElectionWon + Bonus;
+}
+
+int UNJPUtilityFunctionLibrary::CalculateMedalsEarned(int MedalMultiplier, int SeatsWon)
+{
+	return MedalMultiplier * SeatsWon;
+}
+
+
+float UNJPUtilityFunctionLibrary::LerpByRange(float Desired, float Current, FTimespan DisplayTimeSpan, FDateTime StartTime)
+{
+	if (Desired == Current ||
+		FDateTime::Now() > StartTime + DisplayTimeSpan)
+		return Desired;
+
+	FTimespan diff = FDateTime::Now() - StartTime;
+	if (DisplayTimeSpan.GetTotalSeconds() != 0)
+	{
+		float alpha = FMath::Min(1.0, (double)diff.GetTotalSeconds() / DisplayTimeSpan.GetTotalSeconds());
+		return FMath::Lerp(Current, Desired, alpha);
+	}
+	//
+	return Desired;
 }

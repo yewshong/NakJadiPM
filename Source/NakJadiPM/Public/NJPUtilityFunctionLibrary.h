@@ -14,6 +14,12 @@ class NAKJADIPM_API UNJPUtilityFunctionLibrary : public UBlueprintFunctionLibrar
 {
 	GENERATED_BODY()
 public:
+		static const bool UseCheat = false;
+		static const int TotalSeats = 222;
+		static const int SeatsToWinElection = 112;
+		static constexpr  float MaxOppoDamagePerLevel = 100.0f;
+		static constexpr  float MinOppoDamage = 0.1f;
+
 	UFUNCTION(BlueprintCallable, Category = "NJPUtility")
 		static UTexture2D* LoadTextureFromPath(const FString& Path);
 	
@@ -58,4 +64,21 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "NJPUtility")
 		static float RecalculateClickGain(FCurrentCampaignData &CampaignData,float Bonus, int ClickSkillIndex);
 
+	UFUNCTION(BlueprintCallable, Category = "NJPUtility")
+		static float RecalculateOpponentVPS(int Seatnumber, int MalaysiaLevel);
+
+	UFUNCTION(BlueprintCallable, Category = "NJPUtility")
+		static int CalculateElectionWon(FCurrentCampaignData CampaignData);	
+
+	UFUNCTION(BlueprintCallable, Category = "NJPUtility")
+		static int CalculateSeatsWon(FCurrentCampaignData CampaignData);
+
+	UFUNCTION(BlueprintCallable, Category = "NJPUtility")
+		static int CalculateMedalsMultiplier(int ElectionWon, int Bonus);
+
+	UFUNCTION(BlueprintCallable, Category = "NJPUtility")
+		static int CalculateMedalsEarned(int MedalMultiplier, int SeatsWon);
+
+	UFUNCTION(BlueprintCallable, Category = "NJPUtility")
+		static float LerpByRange(float Desired, float Current, FTimespan DisplayTimeSpan, FDateTime StartTime);
 };
