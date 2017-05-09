@@ -49,7 +49,7 @@ void AGamePlayManager::Initialize()
 			CurrentGameData->CampaignData.VotesPerSecond = UNJPUtilityFunctionLibrary::ConvertTo2Decimals(CurrentGameData->CampaignData.VotesPerSecond);
 
 			ProcessParlimentSeatsResult();
-			ProcessGameResume();
+			//ProcessGameResume();
 
 			FTimerHandle GameUpdateTimerHandle = FTimerHandle();
 			GetWorldTimerManager().SetTimer(GameUpdateTimerHandle, this, &AGamePlayManager::UpdateGamePerSecond, UpdateTimeSpan.GetSeconds(), true);
@@ -319,7 +319,7 @@ void AGamePlayManager::SaveCurrentGame()
 	}
 }
 
-void AGamePlayManager::ProcessGameResume()
+float AGamePlayManager::ProcessGameResume()
 {
 	if (CurrentGameData)
 	{
@@ -333,12 +333,15 @@ void AGamePlayManager::ProcessGameResume()
 		float preProcessBalance = CurrentGameData->CampaignData.Balance;
 		ProcessVotesPerSecond();
 		float Gains = CurrentGameData->CampaignData.Balance - preProcessBalance;
-		if (Gains > 0 && !CurrentGameData->CampaignData.Finished)
-			FireShowResumeDialogueEvent(Gains);
+		//if (Gains > 0 && !CurrentGameData->CampaignData.Finished)
+		//	FireShowResumeDialogueEvent(Gains);
 
 		CurrentGameData->CampaignData.TimeRemaining = CurrentGameData->CampaignData.TimeRemaining - GetTimeSpanBetweenNowAndLastProcessTime();
 		CurrentGameData->CampaignData.LastProcessTime = FDateTime::Now();
+		
+		return Gains;
 	}
+	return 0;
 }
 
 float AGamePlayManager::GetGainsBetweenNowAndLastProcessTime()
@@ -396,11 +399,11 @@ FTimespan AGamePlayManager::GetDoubleIdleTimeSpanBetweenNowAndLastProcessTime()
 	return result;
 }
 
-void AGamePlayManager::FireShowResumeDialogueEvent(float IdleGains)
+/*void AGamePlayManager::FireShowResumeDialogueEvent(float IdleGains)
 {
 	OnShowResumeDialogue.Broadcast(IdleGains);
 	UE_LOG(LogTemp, Warning, TEXT("Show Resume Dialogue! Idle Gains: %f"),IdleGains);
-}
+}*/
 
 void AGamePlayManager::ProcessFinishedReport(int MedalsEarned)
 {
@@ -535,13 +538,12 @@ float AGamePlayManager::GetOpponentProgress()
 	}
 	return 0;
 }
-int  AGamePlayManager::GetRandomOpponentIndex(FString SelectedCandidateName)
+int  AGamePlayManager::GetRandomOpponentIndex(FText SelectedCandidateName)
 {
 	if (CurrentGameData)
 	{
 		int Random = FMath::RandRange(0, CurrentGameData->CampaignData.CandidatesData.AllCandidates.Num() - 2);
-		UE_LOG(LogTemp, Warning, TEXT("Random Candidate Name: %s"), *CurrentGameData->CampaignData.CandidatesData.AllCandidates[Random].Name);
-		if (CurrentGameData->CampaignData.CandidatesData.AllCandidates[Random].Name != SelectedCandidateName)
+		if (CurrentGameData->CampaignData.CandidatesData.AllCandidates[Random].Name.ToString() != SelectedCandidateName.ToString())
 			return Random;
 		else if (Random != CurrentGameData->CampaignData.CandidatesData.AllCandidates.Num() - 2)
 			return Random + 1;
@@ -551,13 +553,13 @@ int  AGamePlayManager::GetRandomOpponentIndex(FString SelectedCandidateName)
 	return -1;
 }
 
-int  AGamePlayManager::GetRandomPartiIndex(FString SelectedCandidateParti)
+int  AGamePlayManager::GetRandomPartiIndex(FText SelectedCandidateParti)
 {
 	if (CurrentGameData)
 	{
 		int Random = FMath::RandRange(0, CurrentGameData->CampaignData.PoliticPartiesData.Parties.Num() - 2);
-		UE_LOG(LogTemp, Warning, TEXT("Random Candidate Name: %s"), *CurrentGameData->CampaignData.PoliticPartiesData.Parties[Random].Name);
-		if (CurrentGameData->CampaignData.PoliticPartiesData.Parties[Random].Name != SelectedCandidateParti)
+		
+		if (CurrentGameData->CampaignData.PoliticPartiesData.Parties[Random].Name.ToString() != SelectedCandidateParti.ToString())
 			return Random;
 		else if (Random != CurrentGameData->CampaignData.PoliticPartiesData.Parties.Num() - 2)
 			return Random + 1;
@@ -683,6 +685,28 @@ void AGamePlayManager::ClaimedProduct(FString ProductID, FString TransactionID)
 }
 
 
+void AGamePlayManager::RestoredProduct(FString ProductID, FString TransactionID)
+{
+	if (CurrentProductsData && DataManager)
+	{
+		bool found = false;
+		for (int i = 0; i < CurrentProductsData->ConsumedRecords.Num(); i++)
+		{
+			if (CurrentProductsData->ConsumedRecords[i].ProductID == ProductID &&
+				CurrentProductsData->ConsumedRecords[i].TransactionID == TransactionID)
+			{
+				found = true;
+				break;
+			}
+		}
+		if (!found)
+		{
+			ClaimedProduct(ProductID, TransactionID);
+		}
+	}	
+}
+
+
 void AGamePlayManager::ActivateNoAds()
 {
 	if (CurrentProductsData && DataManager)
@@ -701,6 +725,7 @@ void AGamePlayManager::RecordConsumed(FString ProductID, FString TransactionID)
 		newRecord.TransactionID = TransactionID;
 		newRecord.UsedDate = FDateTime::Now();
 		CurrentProductsData->ConsumedRecords.Add(newRecord);
+		DataManager->UpdateProductSave(CurrentProductsData);
 	}
 }
 
@@ -806,4 +831,15 @@ bool AGamePlayManager::IsNoAds()
 		return CurrentProductsData->NoAds;
 	}
 	return false;
+}
+
+
+void AGamePlayManager::SetWatchAdsForMedalCoolDown()
+{
+	if (CurrentProductsData && DataManager)
+	{
+		CurrentProductsData->MedalAdsRecord.LastClaimTime = FDateTime::Now() +
+			CurrentProductsData->MedalAdsRecord.Cooldown;
+		DataManager->UpdateProductSave(CurrentProductsData);
+	}
 }

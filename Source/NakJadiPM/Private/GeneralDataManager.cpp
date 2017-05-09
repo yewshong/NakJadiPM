@@ -302,6 +302,10 @@ bool AGeneralDataManager::CreateNewAndSaveGame(FCandidate SelectedCandidate, FPo
 	
 	CampaignData.SelectedCandidate = SelectedCandidate;
 	CampaignData.SelectedParty = SelectedParty;
+
+	//Sort Parliament Seats before pass
+	ParlimentSeatsData.ParlimentSeats.Sort();
+
 	CampaignData.ParlimentSeatsData = ParlimentSeatsData;
 	CampaignData.StatesData = StatesData;
 	CampaignData.SkillsCostData = SkillsCostData;

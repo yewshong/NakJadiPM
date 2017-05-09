@@ -11,7 +11,7 @@ struct FPoliticParty : public FTableRowBase
 	GENERATED_USTRUCT_BODY()
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-		FString Name;
+		FText Name;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 		FString TexturePath;
 };
@@ -39,7 +39,7 @@ struct FState : public FTableRowBase
 	GENERATED_USTRUCT_BODY()
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FString Name;
+		FString Name;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FString TexturePath;
 };
@@ -70,10 +70,15 @@ struct FParlimentSeat : public FTableRowBase
 	FString State;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FString Name;
+	FText Name;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	int Count;
+
+	bool operator<(const FParlimentSeat& rhs) const
+	{
+		return Count < rhs.Count;
+	}
 };
 
 USTRUCT(BlueprintType)

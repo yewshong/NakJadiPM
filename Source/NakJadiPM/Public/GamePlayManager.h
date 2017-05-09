@@ -15,14 +15,14 @@ UCLASS()
 class NAKJADIPM_API AGamePlayManager : public AActor
 {
 	GENERATED_BODY()
-		DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FShowResumeDialogue, float, idleGain);
+	//	DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FShowResumeDialogue, float, idleGain);
 public:	
 	
-	UFUNCTION(BlueprintCallable, Category = "Event")
-		void FireShowResumeDialogueEvent(float IdleGains);
+//	UFUNCTION(BlueprintCallable, Category = "Event")
+	//	void FireShowResumeDialogueEvent(float IdleGains);
 
-	UPROPERTY(BlueprintAssignable, Category = "Event")
-		FShowResumeDialogue OnShowResumeDialogue;
+	//UPROPERTY(BlueprintAssignable, Category = "Event")
+	//	FShowResumeDialogue OnShowResumeDialogue;
 
 	//DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnResumeProcessedFinished, AGamePlayManager*);
 	// Sets default values for this actor's properties
@@ -90,7 +90,7 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Processing")
 		void ProcessAchievement();
 	UFUNCTION(BlueprintCallable, Category = "Processing")
-		void ProcessGameResume();
+		float ProcessGameResume();
 	UFUNCTION(BlueprintCallable, Category = "Processing")
 		float ReturnRemainingVotesFromCurrentSeat();
 	UFUNCTION(BlueprintCallable, Category = "Processing")
@@ -130,9 +130,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "RetrieveData")
 		float GetOpponentProgress();
 	UFUNCTION(BlueprintCallable, Category = "RetrieveData")
-		int GetRandomOpponentIndex(FString SelectedCandidateName);
+		int GetRandomOpponentIndex(FText SelectedCandidateName);
 	UFUNCTION(BlueprintCallable, Category = "RetrieveData")
-		int GetRandomPartiIndex(FString SelectedCandidateParti);
+		int GetRandomPartiIndex(FText SelectedCandidateParti);
 
 	UFUNCTION(BlueprintCallable, Category = "Balloon")
 	FBalloonSkill GetRandomBalloonSkill();
@@ -148,6 +148,8 @@ public:
 		void MinusMedal(int number);
 	UFUNCTION(BlueprintCallable, Category = "Medal")
 		bool IsEnoughMedal(int MedalRequest);
+	UFUNCTION(BlueprintCallable, Category = "Medal")
+		void SetWatchAdsForMedalCoolDown();
 
 	UFUNCTION(BlueprintPure, Category = "Medal")
 		bool IsNoAds();
@@ -156,6 +158,8 @@ public:
 		void ProductsInfoReceived(FString productID, FString DisplayPrice);
 	UFUNCTION(BlueprintCallable, Category = "Product")
 		void ClaimedProduct(FString ProductID, FString TransactionID);
+	UFUNCTION(BlueprintCallable, Category = "Product")
+		void RestoredProduct(FString ProductID, FString TransactionID);
 	UFUNCTION(BlueprintCallable, Category = "Product")
 		void ActivateNoAds();
 	UFUNCTION(BlueprintCallable, Category = "Product")

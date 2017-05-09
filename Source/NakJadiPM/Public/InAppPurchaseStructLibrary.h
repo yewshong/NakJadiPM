@@ -161,7 +161,7 @@ struct FMedalAdsRecord : public FTableRowBase
 
 	FMedalAdsRecord()
 	{
-		Cooldown = FTimespan(0, 15, 0);
+		Cooldown = FTimespan(0, 20, 0);
 		LastClaimTime = FDateTime::Now() - Cooldown;
 	}
 };

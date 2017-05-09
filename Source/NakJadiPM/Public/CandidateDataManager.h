@@ -63,9 +63,9 @@ struct FCandidateSkills : public FTableRowBase
 	GENERATED_USTRUCT_BODY()
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FString Name;
+	FText Name;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FString Description;
+	FText Description;
 };
 
 USTRUCT(BlueprintType)
@@ -200,21 +200,21 @@ struct FCandidate : public FTableRowBase
 	GENERATED_USTRUCT_BODY()
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-		FString Name;
+		FText Name;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	TArray<FString> Skills;
+	TArray<FText> Skills;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-		TArray<FString> SpecialSkills;
+		TArray<FText> SpecialSkills;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FString potraitPath;
 
 	FCandidate()
 	{
-		Skills = TArray<FString>();
-		SpecialSkills = TArray<FString>();
+		Skills = TArray<FText>();
+		SpecialSkills = TArray<FText>();
 	}
 };
 
@@ -336,7 +336,7 @@ struct FCurrentCampaignData
 		PoliticPartiesData = FAllPoliticPartyData();
 		SeatPossessionRecord = TArray<FParlimentSeatResult>();
 		SkillUpgradeRecord = TArray<FSkillUpgradeInfo>();
-		 StaffUpgradesData = FAllStaffUpgradeData();
+		StaffUpgradesData = FAllStaffUpgradeData();
 	}
 
 	static bool VerifyCaimpagnData(FCurrentCampaignData Data)

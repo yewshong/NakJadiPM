@@ -246,3 +246,9 @@ float UNJPUtilityFunctionLibrary::LerpByRange(float Desired, float Current, FTim
 	//
 	return Desired;
 }
+
+
+float UNJPUtilityFunctionLibrary::Interpolate(float Desired, float Current, float speed)
+{
+	return 0;
+}

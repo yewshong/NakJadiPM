@@ -15,18 +15,20 @@ public class NakJadiPM : ModuleRules
 
         // Uncomment if you are using online features
         // PrivateDependencyModuleNames.Add("OnlineSubsystem");
+        DynamicallyLoadedModuleNames.Add("OnlineSubsystemNull");
+
+        //added to support http get from php
+        PrivateDependencyModuleNames.AddRange(new string[] { "Http", "Json", "JsonUtilities" });
 
         // To include OnlineSubsystemSteam, add it to the plugins section in your uproject file with the Enabled attribute set to true
         if (Target.Platform == UnrealTargetPlatform.Android)
         {
-            //PrivateDependencyModuleNames.AddRange(new string[] { "OnlineSubsystemGooglePlay", "AndroidAdvertising" });
             // DynamicallyLoadedModuleNames.Add("OnlineSubsystemGooglePlay");
 
-            //PrivateDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "OnlineSubsystem", "AndroidAdvertising" });
-            //DynamicallyLoadedModuleNames.Add("OnlineSubsystemGooglePlay");
+            //PrivateDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "OnlineSubsystem", "AndroidAdvertising","OnlineSubsystemGooglePlay" });
 
-            PrivateDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "OnlineSubsystem", "AndroidAdvertising", "OnlineSubsystemGooglePlay" });
-            //DynamicallyLoadedModuleNames.Add("OnlineSubsystemGooglePlay");
+            PrivateDependencyModuleNames.Add("OnlineSubsystem");
+            PrivateDependencyModuleNames.Add("OnlineSubsystemGooglePlay");
         }
     }
 }

@@ -14,6 +14,7 @@ UProductsSaveGame::UProductsSaveGame()
 	NoAds = false;
 	NoAdsActivated = true;
 	MedalAdsRecord = FMedalAdsRecord();
+	DateTimeOfWatchAdsForMedalAvailable = FDateTime::Now();
 
 #if PLATFORM_WINDOWS
 	NoAds = true;

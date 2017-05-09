@@ -17,7 +17,7 @@ public:
 		static const bool UseCheat = false;
 		static const int TotalSeats = 222;
 		static const int SeatsToWinElection = 112;
-		static constexpr  float MaxOppoDamagePerLevel = 100.0f;
+		static constexpr  float MaxOppoDamagePerLevel = 500.0f;
 		static constexpr  float MinOppoDamage = 0.1f;
 
 	UFUNCTION(BlueprintCallable, Category = "NJPUtility")
@@ -81,4 +81,7 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "NJPUtility")
 		static float LerpByRange(float Desired, float Current, FTimespan DisplayTimeSpan, FDateTime StartTime);
+	
+	UFUNCTION(BlueprintCallable, Category = "NJPUtility")
+		static float Interpolate(float Desired, float Current, float speed);
 };
