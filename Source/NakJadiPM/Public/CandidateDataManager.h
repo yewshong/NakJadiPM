@@ -203,6 +203,9 @@ struct FCandidate : public FTableRowBase
 		FText Name;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+		FText Description;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TArray<FText> Skills;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)

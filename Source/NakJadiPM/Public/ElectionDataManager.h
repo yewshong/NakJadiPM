@@ -13,6 +13,8 @@ struct FPoliticParty : public FTableRowBase
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 		FText Name;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+		FText Description;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 		FString TexturePath;
 };
 
