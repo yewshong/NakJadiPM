@@ -42,7 +42,6 @@ void AGamePlayManager::Initialize()
 
 		if (CurrentGameData)
 		{
-
 			CurrentGameData->CampaignData.ClickDamage = UNJPUtilityFunctionLibrary::RecalculateClickGain(CurrentGameData->CampaignData, GetBonusClickMultiplier(), ClickSkillIndex);
 			CurrentGameData->CampaignData.ClickDamage = UNJPUtilityFunctionLibrary::ConvertTo2Decimals(CurrentGameData->CampaignData.ClickDamage);
 			CurrentGameData->CampaignData.VotesPerSecond = UNJPUtilityFunctionLibrary::RecalculateVPS(CurrentGameData->CampaignData, GetBonusVPSMultiplier(), ClickSkillIndex);
@@ -68,6 +67,12 @@ void AGamePlayManager::Tick( float DeltaTime )
 
 void AGamePlayManager::UpdateGamePerSecond()
 {
+	if (CurrentGameData->CampaignData.Finished)
+	{
+
+		UE_LOG(LogAndroid, Warning, TEXT("campaign finished"));
+	}
+
 	if (CurrentGameData && !CurrentGameData->CampaignData.Finished)
 	{
 		//CurrentGameData
@@ -132,23 +137,73 @@ void AGamePlayManager::ProcessParlimentSeatsResult()
 	{
 		if (CurrentGameData->CampaignData.SeatPossessionRecord.Num() == 0)
 		{
+			AddNewSeatsResult();
+		}
+		else
+		{
+
+			FParlimentSeatResult * CurrentResult = &CurrentGameData->CampaignData.SeatPossessionRecord.Last();
+			if(CurrentResult->Status == ESeatStatus::Done)
+				AddNewSeatsResult();
+			else
+			{
+				
+				if (CurrentResult->StateSeatsDone())
+				{
+					if (CurrentResult->GetPossesionPercent() > WinPercentageThreshold)
+					{
+						CurrentResult->Status = ESeatStatus::Done;
+						AddNewSeatsResult();
+					}
+				}
+				else
+				{
+					for (int i = 0; i < CurrentResult->StateSeatsResult.Num(); i++)
+					{
+						if (CurrentResult->StateSeatsResult[i].Status != ESeatStatus::Done)
+						{
+
+							UE_LOG(LogTemp, Warning, TEXT("Current Possesion is: %f"), CurrentResult->StateSeatsResult[i].possesion);
+							UE_LOG(LogTemp, Warning, TEXT("CurrentStateSeatCount is: %d"), CurrentResult->StateSeatsResult[i].Count);
+							UE_LOG(LogTemp, Warning, TEXT("Current Possesion Percent is: %f"), CurrentResult->StateSeatsResult[i].GetPossesionPercent());
+							UE_LOG(LogTemp, Warning, TEXT("============================================="));
+							if (CurrentResult->StateSeatsResult[i].GetPossesionPercent() > WinPercentageThreshold)
+							{
+								CurrentResult->StateSeatsResult[i].Status = ESeatStatus::Done;
+							}
+							break;
+						}
+					}
+				}
+			}
+		}
+
+		/*if (CurrentGameData->CampaignData.SeatPossessionRecord.Num() == 0)
+		{
 			//add a new one
 			FParlimentSeatResult SeatResult = FParlimentSeatResult();
-			SeatResult.Index = 0;
-			SeatResult.possesion = 0;
-			//todo add candidate
 			SeatResult.OpponentIndex = GetRandomOpponentIndex(CurrentGameData->CampaignData.SelectedCandidate.Name);
-			SeatResult.OpponentVPS = UNJPUtilityFunctionLibrary::RecalculateOpponentVPS(CurrentGameData->CampaignData.SeatPossessionRecord.Num(), 1);// OpponentBaseVPS + (OpponentVPSAddictive*SeatResult.Index);
-			SeatResult.OpponentPossesion = 0;
+			
 			SeatResult.PartiIndex = GetRandomPartiIndex(CurrentGameData->CampaignData.SelectedParty.Name);
+			for (auto StateSeatData : CurrentGameData->CampaignData.ParlimentSeatsData.ParlimentSeats[SeatResult.Index].StateSeats)
+			{
+				FStateSeatResult StateResult = FStateSeatResult();
+				StateResult.OpponentVPS = 
+				SeatResult.StateSeatsResult.Add(StateResult);
+			}
+			UNJPUtilityFunctionLibrary::RecalculateSeatOpponentVPS(CurrentGameData->CampaignData.SeatPossessionRecord.Num(), 1, GetHalveOpponentVPSMultiplier(), SeatResult);
 			CurrentGameData->CampaignData.SeatPossessionRecord.Add(SeatResult);
 		}
 		else
 		{
-			//FParlimentSeatResult CurrentSeatResult = CurrentGameData->CampaignData.SeatPossessionRecord.Last();
+			//get from parliment seat data base on number
+			//if done then add
+			// add check at add vote 
+			Todo::
+            
 
-			//UE_LOG(LogTemp, Warning, TEXT("CurrentSeatPossesion: %f "), CurrentSeatResult.possesion);
-			//if (CurrentSeatResult.possesion >= GetVotersCountByIndex(CurrentGameData->CampaignData.SeatPossessionRecord.Num() - 1))
+
+
 
 			if (GetCandidateProgress()*100 > WinPercentageThreshold)
 			{
@@ -158,9 +213,10 @@ void AGamePlayManager::ProcessParlimentSeatsResult()
 					SeatResult.Index = CurrentGameData->CampaignData.SeatPossessionRecord.Num();
 					SeatResult.possesion = 0;
 					SeatResult.OpponentIndex = GetRandomOpponentIndex(CurrentGameData->CampaignData.SelectedCandidate.Name);
-					SeatResult.OpponentVPS = UNJPUtilityFunctionLibrary::RecalculateOpponentVPS(CurrentGameData->CampaignData.SeatPossessionRecord.Num(), 1); //OpponentBaseVPS + (OpponentVPSAddictive*SeatResult.Index);
+					//SeatResult.OpponentVPS = UNJPUtilityFunctionLibrary::RecalculateOpponentVPS(CurrentGameData->CampaignData.SeatPossessionRecord.Num(), 1, GetHalveOpponentVPSMultiplier()); //OpponentBaseVPS + (OpponentVPSAddictive*SeatResult.Index);
 					SeatResult.OpponentPossesion = 0;
 					SeatResult.PartiIndex = GetRandomPartiIndex(CurrentGameData->CampaignData.SelectedParty.Name);
+					UNJPUtilityFunctionLibrary::RecalculateSeatOpponentVPS(CurrentGameData->CampaignData.SeatPossessionRecord.Num(), 1, GetHalveOpponentVPSMultiplier(), SeatResult);
 					CurrentGameData->CampaignData.SeatPossessionRecord.Add(SeatResult);
 				}
 				else
@@ -169,8 +225,22 @@ void AGamePlayManager::ProcessParlimentSeatsResult()
 					CurrentGameData->CampaignData.Finished = true;
 				}
 			}
-		}
+		}*/
 	}
+}
+
+
+void AGamePlayManager::AddNewSeatsResult()
+{
+	FParlimentSeatResult SeatResult = FParlimentSeatResult();
+	SeatResult.Index = CurrentGameData->CampaignData.SeatPossessionRecord.Num() % CurrentGameData->CampaignData.ParlimentSeatsData.ParlimentSeats.Num();
+	SeatResult.OpponentIndex = GetRandomOpponentIndex(CurrentGameData->CampaignData.SelectedCandidate.Name);
+	SeatResult.PartiIndex = GetRandomPartiIndex(CurrentGameData->CampaignData.SelectedParty.Name);
+	int MalaysiaLevel = (CurrentGameData->CampaignData.SeatPossessionRecord.Num() / CurrentGameData->CampaignData.ParlimentSeatsData.ParlimentSeats.Num()) + 1;
+	UNJPUtilityFunctionLibrary::AddStateSeatAndRecalculateSeatVoteCount(CurrentGameData->CampaignData.SeatPossessionRecord.Num(), SeatResult, CurrentGameData->CampaignData.ParlimentSeatsData.ParlimentSeats[SeatResult.Index]);
+	UNJPUtilityFunctionLibrary::RecalculateSeatOpponentVPS(CurrentGameData->CampaignData.SeatPossessionRecord.Num(), MalaysiaLevel, GetHalveOpponentVPSMultiplier(), SeatResult);
+	
+	CurrentGameData->CampaignData.SeatPossessionRecord.Add(SeatResult);
 }
 
 void AGamePlayManager::ProcessVotesPerSecond()
@@ -235,16 +305,16 @@ void AGamePlayManager::AddVotesToSeats(float VoteCount)
 {
 	if (CurrentGameData->CampaignData.SeatPossessionRecord.Num()>0)
 	{
-		float VotesCurrent = VoteCount;
+		/*float VotesCurrent = VoteCount;
 		float VotesRemaining = ReturnRemainingVotesFromCurrentSeat();
 		if (VotesRemaining > VotesCurrent)
 		{
-			CurrentGameData->CampaignData.SeatPossessionRecord.Last().possesion += VotesCurrent;
+			CurrentGameData->CampaignData.SeatPossessionRecord.Last().AddVotes(VotesCurrent);
 			return;
 		}
 		else
 		{
-			CurrentGameData->CampaignData.SeatPossessionRecord.Last().possesion += VotesRemaining;
+			CurrentGameData->CampaignData.SeatPossessionRecord.Last().AddVotes(VotesRemaining);
 			VotesCurrent -= VotesRemaining;
 			ProcessParlimentSeatsResult();
 
@@ -253,7 +323,10 @@ void AGamePlayManager::AddVotesToSeats(float VoteCount)
 
 			//if (VotesCurrent > 0)// remove this to make sure no votes carry over by click
 			//	AddVotesToSeats(VotesCurrent);
-		}
+		}*/
+		CurrentGameData->CampaignData.SeatPossessionRecord.Last().AddVotes(VoteCount, false);
+		ProcessParlimentSeatsResult();
+
 	}
 }
 
@@ -263,7 +336,7 @@ void AGamePlayManager::AddVotesToSeatsBySec(bool opponentAlso)
 	{
 		FParlimentSeatResult * CurrentResult = &CurrentGameData->CampaignData.SeatPossessionRecord.Last();
 		
-		float availableVote = FMath::Max(GetVotersCountByIndex(CurrentResult->Index)- CurrentResult->possesion - CurrentResult->OpponentPossesion,0.0f);
+		/*float availableVote = FMath::Max(GetVotersCountByIndex(CurrentResult->Index)- CurrentResult->possesion - CurrentResult->OpponentPossesion,0.0f);
 		float OutStandingVotesToBeDeducted = FMath::Max(CurrentGameData->CampaignData.VotesPerSecond - availableVote,0.0f);
 
 		CurrentResult->possesion += CurrentGameData->CampaignData.VotesPerSecond;
@@ -285,12 +358,8 @@ void AGamePlayManager::AddVotesToSeatsBySec(bool opponentAlso)
 				CurrentResult->possesion -= OutStandingVotesToBeDeducted2;
 				CurrentResult->possesion = FMath::Clamp(CurrentResult->possesion, 0.0f, (float)GetVotersCountByIndex(CurrentResult->Index));
 			}
-		}
-
-
-		//UE_LOG(LogTemp, Warning, TEXT("Player Possesion: %f"), CurrentResult->possesion);
-		//UE_LOG(LogTemp, Warning, TEXT("Opponent Possesion: %f"), CurrentResult->OpponentPossesion);
-		//UE_LOG(LogTemp, Warning, TEXT("Total Possession: %f"), CurrentResult->possesion+CurrentResult->OpponentPossesion);
+		}*/
+		CurrentResult->AddVotes(CurrentGameData->CampaignData.VotesPerSecond, opponentAlso);
 
 		ProcessParlimentSeatsResult();
 	}
@@ -744,7 +813,7 @@ void AGamePlayManager::ProcessStaffUpgrade(FString StaffName, int MedalCost)
 					{ 
 						if (StaffUpgradeData.Name == StaffName)
 						{
-							//add balance if the upgrade is add starting gold before upgrade
+							//add balance if the upgrade is add starting gold before upgrade so the upgrade is correct
 							if (StaffUpgradeData.Type == EStaffUpgradeType::AddStartingGold)
 							{
 								CurrentGameData->CampaignData.Balance += CurrentProductsData->staffUpgradeRecords[i].NextValue -
@@ -753,7 +822,7 @@ void AGamePlayManager::ProcessStaffUpgrade(FString StaffName, int MedalCost)
 
 							CurrentProductsData->staffUpgradeRecords[i] = UNJPUtilityFunctionLibrary::CreateStaffUpgradeRecord(StaffUpgradeData, 
 								CurrentProductsData->staffUpgradeRecords[i].CurrentLevel+1);
-
+							UE_LOG(LogTemp, Warning, TEXT("level upgraded"));
 							//CalculateVPS after upgrade
 							if (StaffUpgradeData.Type == EStaffUpgradeType::AddVPS)
 							{
@@ -764,6 +833,14 @@ void AGamePlayManager::ProcessStaffUpgrade(FString StaffName, int MedalCost)
 							{
 								CurrentGameData->CampaignData.ClickDamage = UNJPUtilityFunctionLibrary::RecalculateClickGain(CurrentGameData->CampaignData, GetBonusClickMultiplier(), ClickSkillIndex);
 								CurrentGameData->CampaignData.ClickDamage = UNJPUtilityFunctionLibrary::ConvertTo2Decimals(CurrentGameData->CampaignData.ClickDamage);
+							}
+							else if (StaffUpgradeData.Type == EStaffUpgradeType::HalveOpponentVPS)
+							{
+								CurrentGameData->CampaignData.SeatPossessionRecord[CurrentGameData->CampaignData.SeatPossessionRecord.Num()-1].OpponentVPS =
+									UNJPUtilityFunctionLibrary::RecalculateOpponentVPS(CurrentGameData->CampaignData.SeatPossessionRecord.Num()-1, 1, GetHalveOpponentVPSMultiplier());
+								//-1 because the other 2 call of function only add record after calculate
+
+								UE_LOG(LogTemp, Warning, TEXT("Halved opponent VPS : %f"), CurrentGameData->CampaignData.SeatPossessionRecord[CurrentGameData->CampaignData.SeatPossessionRecord.Num() - 1].OpponentVPS);
 							}
 
 							break;
@@ -822,6 +899,22 @@ float AGamePlayManager::GetBonusClickMultiplier()
 	}
 
 	return result;
+}
+
+float AGamePlayManager::GetHalveOpponentVPSMultiplier()
+{
+	if (CurrentProductsData)
+	{
+		for (auto A : CurrentProductsData->staffUpgradeRecords)
+		{
+			if (A.Type == EStaffUpgradeType::HalveOpponentVPS)
+			{
+				return A.CurrentValue;
+			}
+		}
+	}
+
+	return 0;
 }
 
 bool AGamePlayManager::IsNoAds()

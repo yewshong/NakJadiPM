@@ -64,6 +64,23 @@ struct FAllStatesData : public FTableRowBase
 };
 
 USTRUCT(BlueprintType)
+struct FStateSeat : public FTableRowBase
+{
+	GENERATED_USTRUCT_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+		FText Name;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+		int Count;
+
+	bool operator<(const FStateSeat& rhs) const
+	{
+		return Count < rhs.Count;
+	}
+};
+
+USTRUCT(BlueprintType)
 struct FParlimentSeat : public FTableRowBase
 {
 	GENERATED_USTRUCT_BODY()
@@ -77,9 +94,23 @@ struct FParlimentSeat : public FTableRowBase
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	int Count;
 
-	bool operator<(const FParlimentSeat& rhs) const
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+		TArray<FStateSeat> StateSeats;
+	
+	FParlimentSeat()
 	{
-		return Count < rhs.Count;
+		StateSeats = TArray<FStateSeat>();
+	}
+
+	bool operator<(const FParlimentSeat& rhs) const
+	{		
+		if ((StateSeats.Num() == 0 && rhs.StateSeats.Num() == 0) ||
+			(StateSeats.Num() != 0 && rhs.StateSeats.Num() != 0))
+			return Count < rhs.Count;
+		else if (StateSeats.Num() == 0 && rhs.StateSeats.Num() != 0)
+			return false;
+		else
+			return true;
 	}
 };
 
@@ -97,6 +128,75 @@ struct FAllParlimentSeatsData : public FTableRowBase
 	FAllParlimentSeatsData()
 	{
 		ParlimentSeats = TArray<FParlimentSeat>();
+	}
+};
+
+UENUM(BlueprintType)
+enum class ESeatStatus : uint8
+{
+	Waiting,
+	Progress,
+	Done,
+};
+
+USTRUCT(BlueprintType)
+struct FStateSeatResult
+{
+	GENERATED_USTRUCT_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+		float possesion;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+		float OpponentPossesion;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+		float OpponentVPS;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+		int Count;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+		ESeatStatus Status;
+
+	FStateSeatResult()
+	{
+		Status = ESeatStatus::Waiting;
+		possesion = 0;
+		OpponentPossesion = 0;
+	}
+
+	float GetPossesionPercent()
+	{
+		return(float)(possesion * 100 / Count);
+	}
+
+
+	void AddVotes(float votes, bool opponentAlso, FDateTime OpponentDisableExpireTime)
+	{
+		float availableVote = FMath::Max(Count - possesion - OpponentPossesion, 0.0f);
+		float OutStandingVotesToBeDeducted = FMath::Max(votes - availableVote, 0.0f);
+
+		possesion += votes;
+		possesion = FMath::Clamp(possesion, 0.0f, (float)Count);
+
+		OpponentPossesion -= OutStandingVotesToBeDeducted;
+		OpponentPossesion = FMath::Clamp(OpponentPossesion, 0.0f, (float)Count);
+
+		if (opponentAlso)
+		{
+			if (FDateTime::Now() > OpponentDisableExpireTime)
+			{
+				float availableVote2 = FMath::Max(Count - possesion - OpponentPossesion, 0.0f);
+				float OutStandingVotesToBeDeducted2 = FMath::Max(OpponentVPS - availableVote2, 0.0f);
+
+				OpponentPossesion += OpponentVPS;
+				OpponentPossesion = FMath::Clamp(OpponentPossesion, 0.0f, (float)Count);
+
+				possesion -= OutStandingVotesToBeDeducted2;
+				possesion = FMath::Clamp(possesion, 0.0f, (float)Count);
+			}
+		}
 	}
 };
 
@@ -126,12 +226,89 @@ struct FParlimentSeatResult
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FDateTime OpponentDisableExpireTime;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+		TArray<FStateSeatResult> StateSeatsResult;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+		ESeatStatus Status;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+		int Count;
+
 	FParlimentSeatResult()
 	{
 		possesion = 0;
 		OpponentPossesion = 0;
 		OpponentDisableExpireTime = FDateTime::Now();
+		StateSeatsResult = TArray<FStateSeatResult>();
+		Status = ESeatStatus::Waiting;
 	}
+
+	float GetPossesionPercent()
+	{
+		return(float)(possesion / Count)*100;
+	}
+
+	bool StateSeatsDone()
+	{
+		for (auto StateSeatResult : StateSeatsResult)
+			if (StateSeatResult.Status != ESeatStatus::Done)
+				return false;
+		return true;
+	}
+
+	int GetCurrentStateSeatsIndex()
+	{
+		for (int i = 0; i < StateSeatsResult.Num(); i++)
+		{
+			if (StateSeatsResult[i].Status != ESeatStatus::Done)
+				return i;
+		}
+		return StateSeatsResult.Num();
+	}
+
+	void AddVotes(float votes, bool opponentAlso)
+	{
+		if (StateSeatsDone())
+		{
+			float availableVote = FMath::Max(Count - possesion - OpponentPossesion, 0.0f);
+			float OutStandingVotesToBeDeducted = FMath::Max(votes - availableVote, 0.0f);
+
+			possesion += votes;
+			possesion = FMath::Clamp(possesion, 0.0f, (float)Count);
+
+			OpponentPossesion -= OutStandingVotesToBeDeducted;
+			OpponentPossesion = FMath::Clamp(OpponentPossesion, 0.0f, (float)Count);
+
+			if (opponentAlso)
+			{
+				if (FDateTime::Now() > OpponentDisableExpireTime)
+				{
+					float availableVote2 = FMath::Max(Count - possesion - OpponentPossesion, 0.0f);
+					float OutStandingVotesToBeDeducted2 = FMath::Max(OpponentVPS - availableVote2, 0.0f);
+
+					OpponentPossesion += OpponentVPS;
+					OpponentPossesion = FMath::Clamp(OpponentPossesion, 0.0f,(float)Count);
+
+					possesion -= OutStandingVotesToBeDeducted2;
+					possesion = FMath::Clamp(possesion, 0.0f, (float)Count);
+				}
+			}
+		}
+		else
+		{
+			for (int i = 0; i < StateSeatsResult.Num(); i++)
+			{
+				if (StateSeatsResult[i].Status != ESeatStatus::Done)
+				{
+					StateSeatsResult[i].AddVotes(votes, opponentAlso, OpponentDisableExpireTime);
+					break;
+				}
+			}
+		}
+	}
+
+
 };
 
 /*USTRUCT(BlueprintType)

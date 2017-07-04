@@ -77,6 +77,10 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "Processing")
 		void ProcessParlimentSeatsResult();
+
+	UFUNCTION(BlueprintCallable, Category = "Processing")
+		void AddNewSeatsResult();
+
 	UFUNCTION(BlueprintCallable, Category = "Processing")
 		void ProcessVotesPerSecond();
 	UFUNCTION(BlueprintCallable, Category = "Processing")
@@ -170,6 +174,9 @@ public:
 		float GetBonusVPSMultiplier();
 	UFUNCTION(BlueprintCallable, Category = "Staff")
 		float GetBonusClickMultiplier();
+
+	UFUNCTION(BlueprintCallable, Category = "Staff")
+		float GetHalveOpponentVPSMultiplier();
 
 	UPROPERTY(EditAnywhere, Category = "GameProperties")
 		float OpponentBaseVPS = 0.1f;

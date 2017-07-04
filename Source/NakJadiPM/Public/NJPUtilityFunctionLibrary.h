@@ -19,6 +19,8 @@ public:
 		static const int SeatsToWinElection = 112;
 		static constexpr  float MaxOppoDamagePerLevel = 500.0f;
 		static constexpr  float MinOppoDamage = 0.1f;
+		static const int minSeatCount = 50;
+		static const int SeatMultiplier = 3;
 
 	UFUNCTION(BlueprintCallable, Category = "NJPUtility")
 		static UTexture2D* LoadTextureFromPath(const FString& Path);
@@ -65,7 +67,16 @@ public:
 		static float RecalculateClickGain(FCurrentCampaignData &CampaignData,float Bonus, int ClickSkillIndex);
 
 	UFUNCTION(BlueprintCallable, Category = "NJPUtility")
-		static float RecalculateOpponentVPS(int Seatnumber, int MalaysiaLevel);
+		static float RecalculateOpponentVPS(int Seatnumber, int MalaysiaLevel, float HalvePercent);
+	
+	UFUNCTION(BlueprintCallable, Category = "NJPUtility")
+		static void RecalculateSeatOpponentVPS(int Seatnumber, int MalaysiaLevel, float HalvePercent, FParlimentSeatResult &ParliamentSeatResult);
+
+	UFUNCTION(BlueprintCallable, Category = "NJPUtility")
+		static void AddStateSeatAndRecalculateSeatVoteCount(int SeatNumber, FParlimentSeatResult &ParliamentSeatResult, FParlimentSeat &ParliamentSeatData);
+
+	UFUNCTION(BlueprintCallable, Category = "NJPUtility")
+		static int CalculateParlimentSeatCount(int SeatNumber);
 
 	UFUNCTION(BlueprintCallable, Category = "NJPUtility")
 		static int CalculateElectionWon(FCurrentCampaignData CampaignData);	
@@ -84,4 +95,22 @@ public:
 	
 	UFUNCTION(BlueprintCallable, Category = "NJPUtility")
 		static float Interpolate(float Desired, float Current, float speed);
+
+	UFUNCTION(BlueprintCallable, Category = "NJPUtility")
+		static void GetCurrentSeatPossesionFromSeat(float &playerPossesion, float &opponentPossesion, int &count, FParlimentSeatResult ParliamentSeatResult);
+	
+	UFUNCTION(BlueprintCallable, Category = "NJPUtility")
+		static FText ConvertFloatToDisplayText(float Number);
+
+	UFUNCTION(BlueprintCallable, Category = "NJPUtility")
+		static void ShowFacebookPage();
+
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "NJPUtility")
+		static bool IsStateSeatDone(FParlimentSeatResult ParliamentSeatResult);
+	
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "NJPUtility")
+		static int CurrentStateSeatIndex(FParlimentSeatResult ParliamentSeatResult);
+
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "NJPUtility")
+	static FString GetFloatAsStringWithPrecision(float TheFloat, int32 Precision, bool IncludeLeadingZero = true);
 };

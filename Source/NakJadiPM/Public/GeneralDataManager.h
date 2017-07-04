@@ -144,6 +144,13 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "Staff")
 		int GetStartingBalance();
+
+	UFUNCTION(BlueprintCallable, Category = "SaveData")
+		bool PlayerSettingsExists();
+	UFUNCTION(BlueprintCallable, Category = "SaveData")
+		bool CreateNewPlayerSettings();
+	UFUNCTION(BlueprintCallable, Category = "Save")
+		bool UpdatePlayerSettings(UPlayerSettings* PlayerSettings);
 	
 };
 																			

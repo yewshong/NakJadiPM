@@ -9,6 +9,7 @@ enum class EStaffUpgradeType : uint8
 	AddVPS,
 	AddStartingGold,
 	AddClick,
+	HalveOpponentVPS,
 };
 
 UENUM(BlueprintType)

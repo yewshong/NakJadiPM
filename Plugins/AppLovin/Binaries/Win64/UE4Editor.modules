@@ -1,9 +1,9 @@
 {
 	"Changelist" : 3249277,
 	"CompatibleChangelist" : 3195953,
-	"BuildId" : "795a18a8-ffbd-4f66-b866-6f20261751f3",
+	"BuildId" : "93942515-7cdc-429c-9a79-6c965c533132",
 	"Modules" : 
 	{
-		"AppLovin" : "UE4Editor-AppLovin-3185.dll"
+		"AppLovin" : "UE4Editor-AppLovin-2634.dll"
 	}
 }

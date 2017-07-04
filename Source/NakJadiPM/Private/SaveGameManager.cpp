@@ -113,8 +113,6 @@ bool ASaveGameManager::ProductsSaveExists()
 
 bool ASaveGameManager::CreateNewProductSaveGameAndSave(FAllProductsData ProductsData, FAllStaffUpgradeData StaffUpgradesData)
 {
-
-	UE_LOG(LogTemp, Error, TEXT("Trying To Create product save game"));
 	UProductsSaveGame* SaveGameInstance = Cast<UProductsSaveGame>(UGameplayStatics::CreateSaveGameObject(UProductsSaveGame::StaticClass()));
 	SaveGameInstance->AllProductsData = ProductsData;
 
@@ -175,4 +173,59 @@ void ASaveGameManager::UpdateStaffUpgradesIfAny(FAllStaffUpgradeData StaffUpgrad
 	}
 	UpdateProductSaveGame(CurrentProductSaveGame);
 	
+}
+
+
+/*UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Save")
+UPlayerSettings* CurrentPlayerSettings;
+UFUNCTION(BlueprintCallable, Category = "Save")
+UPlayerSettings* GetPlayerSettings();
+UFUNCTION(BlueprintCallable, Category = "Save")
+bool SavedPlayerSettingsExists();
+UFUNCTION(BlueprintCallable, Category = "Save")
+bool CreateNewPlayerSettingsAndSave();
+UFUNCTION(BlueprintCallable, Category = "Save")
+bool UpdatePlayerSettingsSave(UPlayerSettings* PlayerSettings);*/
+
+UPlayerSettings* ASaveGameManager::GetPlayerSettings()
+{
+	if (!CurrentPlayerSettings)
+	{
+		UPlayerSettings* LoadGameInstance = Cast<UPlayerSettings>(UGameplayStatics::CreateSaveGameObject(UPlayerSettings::StaticClass()));
+		LoadGameInstance = Cast<UPlayerSettings>(UGameplayStatics::LoadGameFromSlot(LoadGameInstance->SaveSlotName, LoadGameInstance->UserIndex));
+		CurrentPlayerSettings = LoadGameInstance;
+	}
+	return CurrentPlayerSettings;
+}
+
+bool ASaveGameManager::SavedPlayerSettingsExists()
+{
+	if (CurrentPlayerSettings)
+		return true;
+	else
+	{
+		UPlayerSettings* saveGame = GetPlayerSettings();
+		if (saveGame)
+			return true;
+	}
+
+	return false;
+}
+
+bool ASaveGameManager::CreateNewPlayerSettingsAndSave()
+{
+	UPlayerSettings* SaveGameInstance = Cast<UPlayerSettings>(UGameplayStatics::CreateSaveGameObject(UPlayerSettings::StaticClass()));
+	
+	return UGameplayStatics::SaveGameToSlot(SaveGameInstance, SaveGameInstance->SaveSlotName, SaveGameInstance->UserIndex);
+}
+
+bool ASaveGameManager::UpdatePlayerSettingsSave(UPlayerSettings* PlayerSettings)
+{
+	if (UGameplayStatics::SaveGameToSlot(PlayerSettings, PlayerSettings->SaveSlotName, PlayerSettings->UserIndex))
+	{
+		CurrentPlayerSettings = PlayerSettings;
+		return true;
+	}
+	else
+		return false;
 }

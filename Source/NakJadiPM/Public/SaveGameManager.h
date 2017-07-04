@@ -4,6 +4,7 @@
 #include "NJPUtilityFunctionLibrary.h"
 #include "ProductsSaveGame.h"
 #include "CampaignSaveGame.h"
+#include "PlayerSettings.h"
 #include "GameFramework/Actor.h"
 #include "Kismet/GameplayStatics.h"
 #include "SaveGameManager.generated.h"
@@ -44,11 +45,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Save")
 		UProductsSaveGame* GetProductSaveGame();
 	UFUNCTION(BlueprintCallable, Category = "Save")
-		bool ProductsSaveExists();
-	
+		bool ProductsSaveExists();	
 	UFUNCTION(BlueprintCallable, Category = "Save")
 		bool CreateNewProductSaveGameAndSave(FAllProductsData ProductsData, FAllStaffUpgradeData StaffUpgradesData);
-
 	UFUNCTION(BlueprintCallable, Category = "Save")
 		bool UpdateProductSaveGame(UProductsSaveGame* ToBeSavedGame);
 	UFUNCTION(BlueprintCallable, Category = "Save")
@@ -56,5 +55,18 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "Save")
 		void UpdateStaffUpgradesIfAny(FAllStaffUpgradeData StaffUpgrades);
+
+
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Save")
+		UPlayerSettings* CurrentPlayerSettings;
+	UFUNCTION(BlueprintCallable, Category = "Save")
+		UPlayerSettings* GetPlayerSettings();
+	UFUNCTION(BlueprintCallable, Category = "Save")
+		bool SavedPlayerSettingsExists();
+	UFUNCTION(BlueprintCallable, Category = "Save")
+		bool CreateNewPlayerSettingsAndSave();
+	UFUNCTION(BlueprintCallable, Category = "Save")
+		bool UpdatePlayerSettingsSave(UPlayerSettings* PlayerSettings);
 
 };

@@ -305,6 +305,8 @@ bool AGeneralDataManager::CreateNewAndSaveGame(FCandidate SelectedCandidate, FPo
 
 	//Sort Parliament Seats before pass
 	ParlimentSeatsData.ParlimentSeats.Sort();
+	for (int i = 0; i < ParlimentSeatsData.ParlimentSeats.Num(); i++)
+		ParlimentSeatsData.ParlimentSeats[i].StateSeats.Sort();
 
 	CampaignData.ParlimentSeatsData = ParlimentSeatsData;
 	CampaignData.StatesData = StatesData;
@@ -423,4 +425,29 @@ int AGeneralDataManager::GetStartingBalance()
 		}
 	}
 	return 0;
+}
+
+bool AGeneralDataManager::PlayerSettingsExists()
+{
+	if (SaveGameManager)
+		return SaveGameManager->SavedPlayerSettingsExists();
+	else
+		return false;
+}
+
+bool AGeneralDataManager::CreateNewPlayerSettings()
+{
+	if (SaveGameManager)
+		return SaveGameManager->CreateNewPlayerSettingsAndSave();
+	else
+		return false;
+}
+
+
+bool AGeneralDataManager::UpdatePlayerSettings(UPlayerSettings* PlayerSettings)
+{
+	if (SaveGameManager)
+		return SaveGameManager->UpdatePlayerSettingsSave(PlayerSettings);
+	else
+		return false;
 }

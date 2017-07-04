@@ -41,9 +41,6 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
 		FMedalAdsRecord MedalAdsRecord;
-	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
-		FDateTime DateTimeOfWatchAdsForMedalAvailable;
 
 	UFUNCTION()
 		void UpdateProductInfo(FString &ID, FString &DisplayPrice);
